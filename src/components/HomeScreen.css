@@ -64,14 +64,29 @@
   max-width: 360px;
 }
 
-.home__form {
+.home__form-stack {
   width: 100%;
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.home__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.home__field label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #7a7a75;
 }
 
 .home__input {
-  flex: 1;
+  width: 100%;
   background: #16181c;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
@@ -91,27 +106,68 @@
   border-color: rgba(120, 255, 190, 0.5);
 }
 
-.home__submit {
-  width: 50px;
-  flex-shrink: 0;
+.home__submit-full {
+  margin-top: 4px;
+  width: 100%;
   border-radius: 12px;
   border: none;
   background: #78ffbe;
   color: #0a0b0d;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   cursor: pointer;
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
-.home__submit:disabled {
+.home__submit-full:disabled {
   opacity: 0.4;
   cursor: default;
 }
 
-.home__submit:not(:disabled):active {
-  transform: scale(0.94);
+.home__submit-full:not(:disabled):active {
+  transform: scale(0.98);
+}
+
+.home__howto-toggle {
+  margin-top: 22px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: #7a7a75;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.home__howto-toggle svg {
+  transition: transform 0.15s ease;
+}
+
+.home__howto-toggle svg.is-open {
+  transform: rotate(180deg);
+}
+
+.home__howto {
+  margin: 14px 0 0;
+  padding-left: 20px;
+  color: #9a9a94;
+  font-size: 13px;
+  line-height: 1.7;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.home__howto strong {
+  color: #d8d6cf;
+  font-weight: 600;
 }
 
 .home__spinner {

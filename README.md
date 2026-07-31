@@ -1,19 +1,28 @@
 # sinal — player Kick sem enrolação
 
-Player próprio para streams da Kick: player HLS custom (controle real de qualidade,
-zoom, fit e saturação) + chat lateral, pensado pra mobile primeiro.
+Player próprio pra streams da Kick: player HLS custom (qualidade, zoom, fit e
+saturação de verdade) + chat lateral, mobile-first.
 
-## Como funciona
+## Por que colar a URL .m3u8 manualmente
 
-- Você cola o link do canal (`kick.com/nome`).
-- Uma função serverless (`/api/resolve`) busca no servidor os dados públicos do
-  canal na Kick — incluindo a URL real do stream (.m3u8) — e devolve pro app.
-  Isso roda no servidor porque o navegador sozinho esbarra em bloqueio de
-  CORS/Cloudflare da Kick.
-- O player usa `hls.js` pra tocar o .m3u8 direto, com controle total sobre
-  qualidade, imagem e chat.
-- O chat conecta via WebSocket (Pusher) direto do navegador — não passa pelo
-  backend.
+A Kick fica atrás de proteção Cloudflare bem agressiva (fingerprint de TLS,
+desafio JS) que bloqueia qualquer requisição de servidor tentando puxar os
+dados do canal automaticamente — só passa quem "parece" um navegador real
+executando JavaScript. Isso derruba qualquer backend simples (Vercel Function,
+Cloudflare Worker, etc). Por isso o app pede a URL do stream direto: você
+mesmo pega ela do seu navegador, que já passou por esse desafio.
+
+## Como pegar a URL do stream
+
+1. Abra a live da Kick no navegador (onde ela carrega normalmente) e dê play.
+2. Abra as ferramentas de desenvolvedor (no Chrome/Android: menu → mais
+   ferramentas → ferramentas do desenvolvedor; no computador, F12).
+3. Vá na aba **Rede/Network** e filtre por `m3u8`.
+4. Copie a URL que termina em `master.m3u8`.
+5. (Opcional, pro chat) Filtre por `chatroom` na mesma aba — o número na URL
+   da chamada é o ID do chat.
+
+O app tem esse passo a passo embutido na tela inicial também.
 
 ## Rodando localmente
 
@@ -22,32 +31,27 @@ npm install
 npm run dev
 ```
 
-**Importante:** localmente, `npm run dev` (só Vite) não sobe a função
-`/api/resolve` — ela só existe rodando via Vercel. Pra testar local com a API
-funcionando, use a Vercel CLI:
+## Deploy no Cloudflare Workers
+
+O projeto já vem configurado pro modelo atual da Cloudflare (Worker servindo
+os assets estáticos via `wrangler.jsonc`):
 
 ```bash
-npm install -g vercel
-vercel dev
+npm install -g wrangler
+npm run deploy
 ```
 
-## Deploy
-
-Projeto pronto pro Vercel (a pasta `api/` já segue a convenção deles):
+Isso builda o frontend e sobe tudo (`worker.js` + `dist/`) num único deploy.
+Pra testar localmente com o Worker real antes de publicar:
 
 ```bash
-vercel deploy
+npm run worker:dev
 ```
-
-Ou conecte o repositório do GitHub direto no painel da Vercel — nenhuma
-configuração extra é necessária, o `api/resolve.js` é detectado
-automaticamente como função serverless.
 
 ## Limitações conhecidas
 
-- A Kick pode mudar a estrutura da API pública a qualquer momento (não é uma
-  API oficial documentada) — se o resolve parar de funcionar, é o primeiro
-  lugar pra checar.
+- A URL `.m3u8` expira depois de um tempo (é assinada com token) — se o
+  player parar de carregar depois de um tempo, é só pegar o link de novo.
 - No Safari/iOS, a reprodução usa o player HLS nativo do navegador (sem
   `hls.js`), então a troca manual de qualidade não fica disponível — o
   Safari escolhe automaticamente.

@@ -1,13 +1,22 @@
 import { useState } from 'react';
-import { ArrowRight, Radio } from 'lucide-react';
+import { ArrowRight, Radio, ChevronDown } from 'lucide-react';
 import './HomeScreen.css';
 
 export default function HomeScreen({ onSubmit, loading, error }) {
-  const [value, setValue] = useState('');
+  const [streamUrl, setStreamUrl] = useState('');
+  const [channelName, setChannelName] = useState('');
+  const [chatroomId, setChatroomId] = useState('');
+  const [howToOpen, setHowToOpen] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (value.trim()) onSubmit(value.trim());
+    if (streamUrl.trim()) {
+      onSubmit({
+        streamUrl: streamUrl.trim(),
+        channelName: channelName.trim() || 'canal',
+        chatroomId: chatroomId.trim() || null,
+      });
+    }
   };
 
   return (
@@ -21,7 +30,7 @@ export default function HomeScreen({ onSubmit, loading, error }) {
         </div>
 
         <h1 className="home__title">
-          Cole o link do canal.
+          Cole o link do stream.
           <br />
           <span className="home__title-accent">Assista sem travar.</span>
         </h1>
@@ -31,23 +40,89 @@ export default function HomeScreen({ onSubmit, loading, error }) {
           chat do seu jeito.
         </p>
 
-        <form className="home__form" onSubmit={handleSubmit}>
-          <input
-            type="text"
-            inputMode="url"
-            autoCapitalize="off"
-            autoCorrect="off"
-            placeholder="kick.com/nomedocanal"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            className="home__input"
-          />
-          <button type="submit" className="home__submit" disabled={loading || !value.trim()}>
-            {loading ? <span className="home__spinner" /> : <ArrowRight size={18} />}
+        <form className="home__form-stack" onSubmit={handleSubmit}>
+          <div className="home__field">
+            <label htmlFor="stream-url">Link do vídeo (.m3u8)</label>
+            <input
+              id="stream-url"
+              name="streamUrl"
+              type="text"
+              inputMode="url"
+              autoCapitalize="off"
+              autoCorrect="off"
+              placeholder="https://.../master.m3u8"
+              value={streamUrl}
+              onChange={(e) => setStreamUrl(e.target.value)}
+              className="home__input"
+            />
+          </div>
+
+          <div className="home__field">
+            <label htmlFor="channel-name">Nome do canal (opcional)</label>
+            <input
+              id="channel-name"
+              name="channelName"
+              type="text"
+              autoCapitalize="off"
+              autoCorrect="off"
+              placeholder="ex: coringa"
+              value={channelName}
+              onChange={(e) => setChannelName(e.target.value)}
+              className="home__input"
+            />
+          </div>
+
+          <div className="home__field">
+            <label htmlFor="chatroom-id">ID do chat (opcional)</label>
+            <input
+              id="chatroom-id"
+              name="chatroomId"
+              type="text"
+              inputMode="numeric"
+              placeholder="deixe em branco pra assistir sem chat"
+              value={chatroomId}
+              onChange={(e) => setChatroomId(e.target.value)}
+              className="home__input"
+            />
+          </div>
+
+          <button type="submit" className="home__submit-full" disabled={loading || !streamUrl.trim()}>
+            {loading ? <span className="home__spinner" /> : <>Assistir <ArrowRight size={16} /></>}
           </button>
         </form>
 
         {error && <p className="home__error">{error}</p>}
+
+        <button
+          type="button"
+          className="home__howto-toggle"
+          onClick={() => setHowToOpen((v) => !v)}
+        >
+          <ChevronDown size={14} className={howToOpen ? 'is-open' : ''} />
+          Como pegar esses links
+        </button>
+
+        {howToOpen && (
+          <ol className="home__howto">
+            <li>Abra a live no site da Kick pelo navegador e dê play.</li>
+            <li>
+              Abra o DevTools (menu do navegador → mais ferramentas → ferramentas
+              do desenvolvedor, ou aperte F12 no computador).
+            </li>
+            <li>
+              Vá na aba <strong>Rede/Network</strong> e filtre por{' '}
+              <strong>m3u8</strong>.
+            </li>
+            <li>
+              Copie a URL que termina em <strong>master.m3u8</strong> e cole
+              aqui em cima.
+            </li>
+            <li>
+              Pro ID do chat: filtre por <strong>chatroom</strong> na mesma aba
+              de Rede — o número aparece na URL da chamada.
+            </li>
+          </ol>
+        )}
       </div>
     </div>
   );

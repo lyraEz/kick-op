@@ -92,12 +92,9 @@ export default function Player({ channel, onBack }) {
 
           <div className="player-bottombar__info">
             <span className="player-channel-name">{channel.displayName}</span>
-            {channel.isLive && (
-              <span className="player-live-badge">
-                <span className="player-live-dot" /> AO VIVO
-                {channel.viewerCount != null && ` · ${channel.viewerCount}`}
-              </span>
-            )}
+            <span className="player-live-badge">
+              <span className="player-live-dot" /> AO VIVO
+            </span>
           </div>
         </div>
 

@@ -13,6 +13,8 @@ export default function ChatPanel({ chatroomId, open, onToggle }) {
     }
   }, [messages]);
 
+  if (!chatroomId) return null;
+
   return (
     <>
       <button
