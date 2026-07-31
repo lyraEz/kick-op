@@ -1,7 +1,10 @@
-import { MessageCircle, X } from 'lucide-react';
+import { useState } from 'react';
+import { MessageCircle, X, Info } from 'lucide-react';
 import './ChatPanel.css';
 
 export default function ChatPanel({ channelSlug, open, onToggle, controlsVisible }) {
+  const [noticeOpen, setNoticeOpen] = useState(true);
+
   if (!channelSlug) return null;
 
   return (
@@ -27,14 +30,30 @@ export default function ChatPanel({ channelSlug, open, onToggle, controlsVisible
           <span>Chat</span>
         </header>
 
-        {open && (
-          <iframe
-            className="chat-panel__frame"
-            src={`https://kick.com/popout/${channelSlug}/chat`}
-            title="Chat da live"
-            loading="lazy"
-          />
+        {noticeOpen && (
+          <div className="chat-panel__notice">
+            <Info size={13} />
+            <p>
+              Login e envio de mensagem dependem do seu navegador permitir
+              cookies de terceiros pra kick.com. Se não funcionar, é isso.
+            </p>
+            <button
+              onClick={() => setNoticeOpen(false)}
+              aria-label="Dispensar aviso"
+            >
+              <X size={13} />
+            </button>
+          </div>
         )}
+
+        {/* Sempre montado (não só quando "open") pra não recarregar o chat
+            toda vez que o usuário minimiza e abre de novo. O painel fica
+            só visualmente escondido (ver .chat-panel / visibility no CSS). */}
+        <iframe
+          className="chat-panel__frame"
+          src={`https://kick.com/popout/${channelSlug}/chat`}
+          title="Chat da live"
+        />
       </aside>
     </>
   );

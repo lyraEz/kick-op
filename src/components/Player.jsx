@@ -14,16 +14,17 @@ export default function Player({ channel, onBack }) {
     channel.playbackUrl
   );
 
-  const { visible: controlsVisible, show: showControls, toggle: toggleControls } =
-    useIdleControls();
-
   const [chatOpen, setChatOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [fit, setFit] = useState('contain');
   const [zoom, setZoom] = useState(100);
   const [saturation, setSaturation] = useState(100);
   const [muted, setMuted] = useState(true);
   const [playing, setPlaying] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const { visible: controlsVisible, show: showControls, toggle: toggleControls } =
+    useIdleControls(settingsOpen || chatOpen);
 
   useEffect(() => {
     const handleChange = () => setIsFullscreen(Boolean(document.fullscreenElement));
@@ -99,7 +100,7 @@ export default function Player({ channel, onBack }) {
 
         <div className="player-chrome">
           <button
-            className="back-button"
+            className="back-button glass"
             onClick={(e) => {
               e.stopPropagation();
               onBack();
@@ -119,17 +120,27 @@ export default function Player({ channel, onBack }) {
             onChangeZoom={setZoom}
             saturation={saturation}
             onChangeSaturation={setSaturation}
+            open={settingsOpen}
+            onToggle={() => setSettingsOpen((v) => !v)}
           />
 
           <div className="player-bottombar" onClick={(e) => e.stopPropagation()}>
-            <button onClick={togglePlay} aria-label={playing ? 'Pausar' : 'Reproduzir'}>
+            <button
+              className="glass"
+              onClick={togglePlay}
+              aria-label={playing ? 'Pausar' : 'Reproduzir'}
+            >
               {playing ? <Pause size={18} /> : <Play size={18} />}
             </button>
-            <button onClick={toggleMute} aria-label={muted ? 'Ativar som' : 'Mutar'}>
+            <button
+              className="glass"
+              onClick={toggleMute}
+              aria-label={muted ? 'Ativar som' : 'Mutar'}
+            >
               {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
             </button>
 
-            <div className="player-bottombar__info">
+            <div className="player-bottombar__info glass">
               <span className="player-channel-name">{channel.displayName}</span>
               <span className="player-live-badge">
                 <span className="player-live-dot" /> AO VIVO
@@ -137,7 +148,7 @@ export default function Player({ channel, onBack }) {
             </div>
 
             <button
-              className="player-fullscreen-btn"
+              className="player-fullscreen-btn glass"
               onClick={toggleFullscreen}
               aria-label={isFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
             >

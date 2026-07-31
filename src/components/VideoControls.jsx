@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Settings, X } from 'lucide-react';
 import './VideoControls.css';
 
@@ -17,16 +16,16 @@ export default function VideoControls({
   onChangeZoom,
   saturation,
   onChangeSaturation,
+  open,
+  onToggle,
 }) {
-  const [open, setOpen] = useState(false);
-
   return (
     <>
       <button
-        className={`settings-toggle ${open ? 'settings-toggle--active' : ''}`}
+        className={`settings-toggle glass ${open ? 'settings-toggle--active' : ''}`}
         onClick={(e) => {
           e.stopPropagation();
-          setOpen((v) => !v);
+          onToggle();
         }}
         aria-label="Configurações de vídeo"
       >
@@ -34,7 +33,7 @@ export default function VideoControls({
       </button>
 
       <div
-        className={`settings-panel ${open ? 'settings-panel--open' : ''}`}
+        className={`settings-panel glass ${open ? 'settings-panel--open' : ''}`}
         onClick={(e) => e.stopPropagation()}
       >
         <section className="settings-group">

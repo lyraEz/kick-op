@@ -65,7 +65,7 @@ export default function HomeScreen({ onSubmit, loading, error }) {
               placeholder="kick.com/coringa ou coringa"
               value={channelInput}
               onChange={(e) => setChannelInput(e.target.value)}
-              className="home__input"
+              className="home__input glass"
             />
           </div>
 
@@ -81,7 +81,7 @@ export default function HomeScreen({ onSubmit, loading, error }) {
               placeholder="https://.../master.m3u8"
               value={streamUrl}
               onChange={(e) => setStreamUrl(e.target.value)}
-              className="home__input"
+              className="home__input glass"
             />
           </div>
 
