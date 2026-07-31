@@ -1,0 +1,136 @@
+.home {
+  position: fixed;
+  inset: 0;
+  background: #0a0b0d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 24px;
+}
+
+.home__glow {
+  position: absolute;
+  top: -20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(120, 255, 190, 0.09) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.home__content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.home__mark {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #78ffbe;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+}
+
+.home__title {
+  font-family: 'Fraunces', 'Georgia', serif;
+  font-size: clamp(30px, 8vw, 42px);
+  line-height: 1.1;
+  color: #f2f0e8;
+  font-weight: 500;
+  margin: 0 0 14px;
+  letter-spacing: -0.01em;
+}
+
+.home__title-accent {
+  color: #9a9a94;
+}
+
+.home__subtitle {
+  color: #8a8a85;
+  font-size: 14.5px;
+  line-height: 1.55;
+  margin: 0 0 32px;
+  max-width: 360px;
+}
+
+.home__form {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+}
+
+.home__input {
+  flex: 1;
+  background: #16181c;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 15px;
+  color: #f2f0e8;
+  outline: none;
+  transition: border-color 0.15s ease;
+  min-width: 0;
+}
+
+.home__input::placeholder {
+  color: #55554f;
+}
+
+.home__input:focus {
+  border-color: rgba(120, 255, 190, 0.5);
+}
+
+.home__submit {
+  width: 50px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  border: none;
+  background: #78ffbe;
+  color: #0a0b0d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.home__submit:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.home__submit:not(:disabled):active {
+  transform: scale(0.94);
+}
+
+.home__spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(10, 11, 13, 0.25);
+  border-top-color: #0a0b0d;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.home__error {
+  margin-top: 14px;
+  color: #ff8a7a;
+  font-size: 13.5px;
+}
