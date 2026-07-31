@@ -3,7 +3,7 @@ import Hls from 'hls.js';
 
 export function useHlsPlayer(videoRef, src) {
   const hlsRef = useRef(null);
-  const [levels, setLevels] = useState([]); // [{index, height, bitrate}]
+  const [levels, setLevels] = useState([]); // [{index, height, bitrate, isSource}]
   const [currentLevel, setCurrentLevel] = useState(-1); // -1 = auto
   const [status, setStatus] = useState('idle'); // idle | loading | ready | error
   const [errorMessage, setErrorMessage] = useState(null);
@@ -14,11 +14,13 @@ export function useHlsPlayer(videoRef, src) {
 
     setStatus('loading');
     setErrorMessage(null);
+    setCurrentLevel(-1);
 
     if (Hls.isSupported()) {
       const hls = new Hls({
         lowLatencyMode: true,
         backBufferLength: 60,
+        capLevelToPlayerSize: false,
       });
       hlsRef.current = hls;
 
@@ -26,20 +28,36 @@ export function useHlsPlayer(videoRef, src) {
       hls.attachMedia(video);
 
       hls.on(Hls.Events.MANIFEST_PARSED, (_evt, data) => {
+        const maxBitrate = Math.max(...data.levels.map((l) => l.bitrate));
         const parsedLevels = data.levels.map((lvl, index) => ({
           index,
           height: lvl.height,
           bitrate: lvl.bitrate,
+          isSource: lvl.bitrate === maxBitrate,
         }));
+        parsedLevels.sort((a, b) => b.height - a.height);
         setLevels(parsedLevels);
         setStatus('ready');
         video.play().catch(() => {});
       });
 
+      hls.on(Hls.Events.LEVEL_SWITCHED, (_evt, data) => {
+        setCurrentLevel(data.level);
+      });
+
       hls.on(Hls.Events.ERROR, (_evt, data) => {
         if (data.fatal) {
-          setStatus('error');
-          setErrorMessage('Não foi possível carregar a transmissão.');
+          switch (data.type) {
+            case Hls.ErrorTypes.NETWORK_ERROR:
+              hls.startLoad();
+              break;
+            case Hls.ErrorTypes.MEDIA_ERROR:
+              hls.recoverMediaError();
+              break;
+            default:
+              setStatus('error');
+              setErrorMessage('Não foi possível carregar a transmissão.');
+          }
         }
       });
 
@@ -50,7 +68,6 @@ export function useHlsPlayer(videoRef, src) {
     }
 
     if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      // Safari nativo (iOS) — sem controle de qualidade manual, mas funciona
       video.src = src;
       video.addEventListener('loadedmetadata', () => {
         setStatus('ready');
@@ -66,10 +83,10 @@ export function useHlsPlayer(videoRef, src) {
   }, [src, videoRef]);
 
   const changeLevel = useCallback((index) => {
-    if (hlsRef.current) {
-      hlsRef.current.currentLevel = index;
-      setCurrentLevel(index);
-    }
+    if (!hlsRef.current) return;
+    hlsRef.current.currentLevel = index;
+    hlsRef.current.nextLevel = index;
+    setCurrentLevel(index);
   }, []);
 
   return { levels, currentLevel, changeLevel, status, errorMessage };

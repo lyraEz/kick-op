@@ -4,7 +4,7 @@ import './VideoControls.css';
 
 const FIT_OPTIONS = [
   { value: 'contain', label: 'Original', hint: 'sem cortes' },
-  { value: 'cover', label: 'Esticado', hint: 'preenche a tela' },
+  { value: 'fill', label: 'Esticado', hint: 'preenche sem cortar' },
 ];
 
 export default function VideoControls({
@@ -24,13 +24,19 @@ export default function VideoControls({
     <>
       <button
         className={`settings-toggle ${open ? 'settings-toggle--active' : ''}`}
-        onClick={() => setOpen((v) => !v)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen((v) => !v);
+        }}
         aria-label="Configurações de vídeo"
       >
         {open ? <X size={18} /> : <Settings size={18} />}
       </button>
 
-      <div className={`settings-panel ${open ? 'settings-panel--open' : ''}`}>
+      <div
+        className={`settings-panel ${open ? 'settings-panel--open' : ''}`}
+        onClick={(e) => e.stopPropagation()}
+      >
         <section className="settings-group">
           <h3>Qualidade</h3>
           <div className="settings-chips">
@@ -40,17 +46,16 @@ export default function VideoControls({
             >
               Auto
             </button>
-            {[...levels]
-              .sort((a, b) => b.height - a.height)
-              .map((lvl) => (
-                <button
-                  key={lvl.index}
-                  className={`chip ${currentLevel === lvl.index ? 'chip--active' : ''}`}
-                  onClick={() => onChangeLevel(lvl.index)}
-                >
-                  {lvl.height}p
-                </button>
-              ))}
+            {levels.map((lvl) => (
+              <button
+                key={lvl.index}
+                className={`chip ${currentLevel === lvl.index ? 'chip--active' : ''}`}
+                onClick={() => onChangeLevel(lvl.index)}
+              >
+                {lvl.isSource ? 'Fonte' : `${lvl.height}p`}
+                {lvl.isSource && <span className="chip__hint">{lvl.height}p</span>}
+              </button>
+            ))}
           </div>
         </section>
 

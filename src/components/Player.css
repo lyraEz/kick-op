@@ -13,12 +13,14 @@
   height: 100%;
   overflow: hidden;
   background: #000;
+  cursor: default;
 }
 
 .player-video {
   width: 100%;
   height: 100%;
   transition: transform 0.15s ease, filter 0.15s ease;
+  pointer-events: none;
 }
 
 .player-overlay {
@@ -33,6 +35,7 @@
   color: #d8d6cf;
   font-size: 14px;
   z-index: 15;
+  pointer-events: none;
 }
 
 .player-overlay__error {
@@ -56,11 +59,29 @@
   }
 }
 
+/* Agrupa tudo que deve sumir quando ocioso: botão voltar, configurações,
+   barra inferior. O chat continua fora desse grupo (ver ChatPanel.css). */
+.player-chrome {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+
+.player-chrome > * {
+  pointer-events: auto;
+}
+
+.player-stage--idle .player-chrome {
+  opacity: 0;
+}
+
 .back-button {
   position: absolute;
   top: 12px;
   left: 12px;
-  z-index: 30;
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -83,7 +104,6 @@
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 20;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -116,6 +136,7 @@
   gap: 2px;
   margin-left: 4px;
   min-width: 0;
+  flex: 1;
 }
 
 .player-channel-name {
@@ -143,4 +164,8 @@
   border-radius: 50%;
   background: #ff6a5c;
   box-shadow: 0 0 5px rgba(255, 106, 92, 0.7);
+}
+
+.player-fullscreen-btn {
+  margin-left: auto;
 }

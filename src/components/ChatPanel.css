@@ -14,7 +14,13 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+  transition: background 0.15s ease, transform 0.15s ease, border-color 0.15s ease,
+    opacity 0.25s ease;
+}
+
+.chat-toggle--hidden {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .chat-toggle:hover {
@@ -92,6 +98,19 @@
   font-size: 13px;
   text-align: center;
   margin-top: 24px;
+}
+
+.chat-panel__empty--error {
+  color: #ff8a7a;
+  padding: 0 6px;
+  line-height: 1.5;
+}
+
+.chat-panel__empty--error code {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 1px 4px;
+  border-radius: 4px;
+  font-size: 12px;
 }
 
 .chat-panel__message {

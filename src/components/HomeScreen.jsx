@@ -118,8 +118,11 @@ export default function HomeScreen({ onSubmit, loading, error }) {
               aqui em cima.
             </li>
             <li>
-              Pro ID do chat: filtre por <strong>chatroom</strong> na mesma aba
-              de Rede — o número aparece na URL da chamada.
+              Pro ID do chat: na mesma aba de Rede, filtre por{' '}
+              <strong>pusher</strong> ou <strong>websocket</strong> (WS). Vai
+              aparecer uma conexão pra <strong>ws-us2.pusher.com</strong> —
+              clique nela, vá na aba de mensagens e procure por{' '}
+              <strong>chatrooms.NÚMERO.v2</strong>. É esse número.
             </li>
           </ol>
         )}

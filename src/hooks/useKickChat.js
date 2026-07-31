@@ -4,12 +4,14 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 const PUSHER_KEY = '32cbd69e4b950bf97679';
 const PUSHER_CLUSTER = 'us2';
 const MAX_MESSAGES = 200;
+const SUBSCRIBE_TIMEOUT = 6000;
 
 export function useKickChat(chatroomId) {
   const [messages, setMessages] = useState([]);
-  const [connected, setConnected] = useState(false);
+  const [status, setStatus] = useState('idle'); // idle | connecting | subscribed | error
   const wsRef = useRef(null);
   const reconnectTimer = useRef(null);
+  const subscribeTimeoutRef = useRef(null);
 
   const clear = useCallback(() => setMessages([]), []);
 
@@ -19,24 +21,43 @@ export function useKickChat(chatroomId) {
     let closedByUs = false;
 
     function connect() {
+      setStatus('connecting');
       const ws = new WebSocket(
         `wss://ws-${PUSHER_CLUSTER}.pusher.com/app/${PUSHER_KEY}?protocol=7&client=js&version=8.4.0&flash=false`
       );
       wsRef.current = ws;
 
       ws.onopen = () => {
-        setConnected(true);
         ws.send(
           JSON.stringify({
             event: 'pusher:subscribe',
             data: { auth: '', channel: `chatrooms.${chatroomId}.v2` },
           })
         );
+
+        // se não confirmar a inscrição em alguns segundos, o ID provavelmente
+        // está errado (canal não existe / não é o chatroom certo)
+        subscribeTimeoutRef.current = setTimeout(() => {
+          setStatus('error');
+        }, SUBSCRIBE_TIMEOUT);
       };
 
       ws.onmessage = (raw) => {
         try {
           const payload = JSON.parse(raw.data);
+
+          if (payload.event === 'pusher_internal:subscription_succeeded') {
+            clearTimeout(subscribeTimeoutRef.current);
+            setStatus('subscribed');
+            return;
+          }
+
+          if (payload.event === 'pusher:error') {
+            clearTimeout(subscribeTimeoutRef.current);
+            setStatus('error');
+            return;
+          }
+
           if (payload.event === 'App\\Events\\ChatMessageEvent') {
             const msg = JSON.parse(payload.data);
             setMessages((prev) => {
@@ -59,8 +80,9 @@ export function useKickChat(chatroomId) {
       };
 
       ws.onclose = () => {
-        setConnected(false);
+        clearTimeout(subscribeTimeoutRef.current);
         if (!closedByUs) {
+          setStatus('connecting');
           reconnectTimer.current = setTimeout(connect, 3000);
         }
       };
@@ -75,10 +97,12 @@ export function useKickChat(chatroomId) {
     return () => {
       closedByUs = true;
       clearTimeout(reconnectTimer.current);
+      clearTimeout(subscribeTimeoutRef.current);
       wsRef.current?.close();
       setMessages([]);
+      setStatus('idle');
     };
   }, [chatroomId]);
 
-  return { messages, connected, clear };
+  return { messages, status, connected: status === 'subscribed', clear };
 }
