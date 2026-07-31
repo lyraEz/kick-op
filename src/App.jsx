@@ -5,13 +5,12 @@ import Player from './components/Player';
 function App() {
   const [channel, setChannel] = useState(null);
 
-  const handleSubmit = ({ streamUrl, channelName, chatroomId }) => {
+  const handleSubmit = ({ streamUrl, channelName, channelSlug }) => {
     setChannel({
       displayName: channelName,
       playbackUrl: streamUrl,
-      chatroomId,
+      channelSlug,
       isLive: true,
-      viewerCount: null,
     });
   };
 

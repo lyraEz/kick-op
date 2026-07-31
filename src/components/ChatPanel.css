@@ -71,61 +71,14 @@
   flex-shrink: 0;
 }
 
-.chat-panel__dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #4a4a45;
-}
-
-.chat-panel__dot.is-live {
-  background: #78ffbe;
-  box-shadow: 0 0 6px rgba(120, 255, 190, 0.6);
-}
-
-.chat-panel__messages {
+.chat-panel__frame {
   flex: 1;
-  overflow-y: auto;
-  padding: 10px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  -webkit-overflow-scrolling: touch;
-}
-
-.chat-panel__empty {
-  color: #5c5c58;
-  font-size: 13px;
-  text-align: center;
-  margin-top: 24px;
-}
-
-.chat-panel__empty--error {
-  color: #ff8a7a;
-  padding: 0 6px;
-  line-height: 1.5;
-}
-
-.chat-panel__empty--error code {
-  background: rgba(255, 255, 255, 0.08);
-  padding: 1px 4px;
-  border-radius: 4px;
-  font-size: 12px;
-}
-
-.chat-panel__message {
-  font-size: 13.5px;
-  line-height: 1.4;
-  color: #d8d6cf;
-  word-break: break-word;
-}
-
-.chat-panel__username {
-  font-weight: 600;
-}
-
-.chat-panel__content {
-  color: #c2c0b8;
+  width: 100%;
+  border: none;
+  background: #0c0e12;
+  /* o popout da Kick já vem com fundo escuro próprio, mas isso evita
+     flash branco enquanto carrega */
+  color-scheme: dark;
 }
 
 @media (min-width: 900px) {

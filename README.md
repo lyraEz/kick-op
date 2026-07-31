@@ -1,16 +1,20 @@
 # sinal — player Kick sem enrolação
 
 Player próprio pra streams da Kick: player HLS custom (qualidade, zoom, fit e
-saturação de verdade) + chat lateral, mobile-first.
+saturação de verdade), tela cheia com controles que somem sozinhos, e chat
+lateral — mobile-first.
 
 ## Por que colar a URL .m3u8 manualmente
 
 A Kick fica atrás de proteção Cloudflare bem agressiva (fingerprint de TLS,
 desafio JS) que bloqueia qualquer requisição de servidor tentando puxar os
-dados do canal automaticamente — só passa quem "parece" um navegador real
-executando JavaScript. Isso derruba qualquer backend simples (Vercel Function,
-Cloudflare Worker, etc). Por isso o app pede a URL do stream direto: você
-mesmo pega ela do seu navegador, que já passou por esse desafio.
+dados do canal automaticamente. Isso derruba qualquer backend simples (Vercel
+Function, Cloudflare Worker, etc). Por isso o app pede a URL do stream
+direto: você mesmo pega ela do seu navegador, que já passou por esse desafio.
+
+O chat **não** tem essa limitação — ele usa a própria página de popout oficial
+da Kick (`kick.com/popout/CANAL/chat`) dentro de um iframe, então só precisa
+do nome do canal, sem nenhum link pra caçar manualmente.
 
 ## Como pegar a URL do stream
 
@@ -19,10 +23,10 @@ mesmo pega ela do seu navegador, que já passou por esse desafio.
    ferramentas → ferramentas do desenvolvedor; no computador, F12).
 3. Vá na aba **Rede/Network** e filtre por `m3u8`.
 4. Copie a URL que termina em `master.m3u8`.
-5. (Opcional, pro chat) Filtre por `chatroom` na mesma aba — o número na URL
-   da chamada é o ID do chat.
 
-O app tem esse passo a passo embutido na tela inicial também.
+Dá pra automatizar esse passo com uma extensão de navegador que capture
+requisições `.m3u8` (é exatamente esse tipo de captura que existe por trás do
+DevTools) — só copiar o link que ela encontrar e colar no site.
 
 ## Rodando localmente
 
@@ -32,9 +36,6 @@ npm run dev
 ```
 
 ## Deploy no Cloudflare Workers
-
-O projeto já vem configurado pro modelo atual da Cloudflare (Worker servindo
-os assets estáticos via `wrangler.jsonc`):
 
 ```bash
 npm install -g wrangler
@@ -55,5 +56,6 @@ npm run worker:dev
 - No Safari/iOS, a reprodução usa o player HLS nativo do navegador (sem
   `hls.js`), então a troca manual de qualidade não fica disponível — o
   Safari escolhe automaticamente.
-- O chat depende da chave pública do Pusher usada pelo site da Kick; se eles
-  trocarem, o hook `useKickChat` precisa da chave nova.
+- O chat depende da Kick continuar servindo a página de popout
+  (`kick.com/popout/CANAL/chat`) sem exigir login para leitura — se algum dia
+  isso mudar, é o primeiro lugar pra checar.

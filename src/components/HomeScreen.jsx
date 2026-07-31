@@ -2,19 +2,32 @@ import { useState } from 'react';
 import { ArrowRight, Radio, ChevronDown } from 'lucide-react';
 import './HomeScreen.css';
 
+function extractSlug(input) {
+  const trimmed = input.trim();
+  if (!trimmed) return '';
+  if (/^[a-zA-Z0-9_-]+$/.test(trimmed)) return trimmed.toLowerCase();
+  try {
+    const url = trimmed.startsWith('http') ? trimmed : `https://${trimmed}`;
+    const parts = new URL(url).pathname.split('/').filter(Boolean);
+    return (parts[0] || '').toLowerCase();
+  } catch {
+    return '';
+  }
+}
+
 export default function HomeScreen({ onSubmit, loading, error }) {
+  const [channelInput, setChannelInput] = useState('');
   const [streamUrl, setStreamUrl] = useState('');
-  const [channelName, setChannelName] = useState('');
-  const [chatroomId, setChatroomId] = useState('');
   const [howToOpen, setHowToOpen] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (streamUrl.trim()) {
+    const slug = extractSlug(channelInput);
+    if (streamUrl.trim() && slug) {
       onSubmit({
         streamUrl: streamUrl.trim(),
-        channelName: channelName.trim() || 'canal',
-        chatroomId: chatroomId.trim() || null,
+        channelSlug: slug,
+        channelName: slug,
       });
     }
   };
@@ -30,7 +43,7 @@ export default function HomeScreen({ onSubmit, loading, error }) {
         </div>
 
         <h1 className="home__title">
-          Cole o link do stream.
+          Cole o link da live.
           <br />
           <span className="home__title-accent">Assista sem travar.</span>
         </h1>
@@ -41,6 +54,21 @@ export default function HomeScreen({ onSubmit, loading, error }) {
         </p>
 
         <form className="home__form-stack" onSubmit={handleSubmit}>
+          <div className="home__field">
+            <label htmlFor="channel-input">Canal (link ou nome de usuário)</label>
+            <input
+              id="channel-input"
+              name="channelInput"
+              type="text"
+              autoCapitalize="off"
+              autoCorrect="off"
+              placeholder="kick.com/coringa ou coringa"
+              value={channelInput}
+              onChange={(e) => setChannelInput(e.target.value)}
+              className="home__input"
+            />
+          </div>
+
           <div className="home__field">
             <label htmlFor="stream-url">Link do vídeo (.m3u8)</label>
             <input
@@ -57,36 +85,11 @@ export default function HomeScreen({ onSubmit, loading, error }) {
             />
           </div>
 
-          <div className="home__field">
-            <label htmlFor="channel-name">Nome do canal (opcional)</label>
-            <input
-              id="channel-name"
-              name="channelName"
-              type="text"
-              autoCapitalize="off"
-              autoCorrect="off"
-              placeholder="ex: coringa"
-              value={channelName}
-              onChange={(e) => setChannelName(e.target.value)}
-              className="home__input"
-            />
-          </div>
-
-          <div className="home__field">
-            <label htmlFor="chatroom-id">ID do chat (opcional)</label>
-            <input
-              id="chatroom-id"
-              name="chatroomId"
-              type="text"
-              inputMode="numeric"
-              placeholder="deixe em branco pra assistir sem chat"
-              value={chatroomId}
-              onChange={(e) => setChatroomId(e.target.value)}
-              className="home__input"
-            />
-          </div>
-
-          <button type="submit" className="home__submit-full" disabled={loading || !streamUrl.trim()}>
+          <button
+            type="submit"
+            className="home__submit-full"
+            disabled={loading || !streamUrl.trim() || !extractSlug(channelInput)}
+          >
             {loading ? <span className="home__spinner" /> : <>Assistir <ArrowRight size={16} /></>}
           </button>
         </form>
@@ -99,7 +102,7 @@ export default function HomeScreen({ onSubmit, loading, error }) {
           onClick={() => setHowToOpen((v) => !v)}
         >
           <ChevronDown size={14} className={howToOpen ? 'is-open' : ''} />
-          Como pegar esses links
+          Como pegar o link do vídeo
         </button>
 
         {howToOpen && (
@@ -115,14 +118,11 @@ export default function HomeScreen({ onSubmit, loading, error }) {
             </li>
             <li>
               Copie a URL que termina em <strong>master.m3u8</strong> e cole
-              aqui em cima.
+              no campo acima.
             </li>
             <li>
-              Pro ID do chat: na mesma aba de Rede, filtre por{' '}
-              <strong>pusher</strong> ou <strong>websocket</strong> (WS). Vai
-              aparecer uma conexão pra <strong>ws-us2.pusher.com</strong> —
-              clique nela, vá na aba de mensagens e procure por{' '}
-              <strong>chatrooms.NÚMERO.v2</strong>. É esse número.
+              O chat não precisa de nenhum link separado — só o nome do canal,
+              que já é usado automaticamente.
             </li>
           </ol>
         )}

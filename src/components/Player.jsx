@@ -147,7 +147,7 @@ export default function Player({ channel, onBack }) {
         </div>
 
         <ChatPanel
-          chatroomId={channel.chatroomId}
+          channelSlug={channel.channelSlug}
           open={chatOpen}
           onToggle={() => setChatOpen((v) => !v)}
           controlsVisible={controlsVisible}
