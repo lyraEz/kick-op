@@ -1,4 +1,5 @@
 import { Settings, X } from 'lucide-react';
+import { PRESETS } from '../constants/presets';
 import './VideoControls.css';
 
 const FIT_OPTIONS = [
@@ -16,13 +17,21 @@ export default function VideoControls({
   onChangeZoom,
   saturation,
   onChangeSaturation,
+  brightness,
+  onChangeBrightness,
+  contrast,
+  onChangeContrast,
+  activePreset,
+  onApplyPreset,
   open,
   onToggle,
 }) {
   return (
     <>
       <button
-        className={`settings-toggle glass ${open ? 'settings-toggle--active' : ''}`}
+        className={`settings-toggle glass glass-btn ${
+          open ? 'glass-btn--active-warn' : ''
+        }`}
         onClick={(e) => {
           e.stopPropagation();
           onToggle();
@@ -33,7 +42,9 @@ export default function VideoControls({
       </button>
 
       <div
-        className={`settings-panel glass ${open ? 'settings-panel--open' : ''}`}
+        className={`settings-panel glass glass--overlay ${
+          open ? 'settings-panel--open' : ''
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
         <section className="settings-group">
@@ -75,6 +86,24 @@ export default function VideoControls({
         </section>
 
         <section className="settings-group">
+          <h3>Presets</h3>
+          <div className="settings-chips">
+            {Object.entries(PRESETS).map(([key, preset]) => (
+              <button
+                key={key}
+                className={`chip ${activePreset === key ? 'chip--active' : ''}`}
+                onClick={() => onApplyPreset(key)}
+              >
+                {preset.label}
+              </button>
+            ))}
+            {activePreset === 'custom' && (
+              <span className="chip chip--custom">Personalizado</span>
+            )}
+          </div>
+        </section>
+
+        <section className="settings-group">
           <div className="settings-row">
             <h3>Zoom</h3>
             <span className="settings-value">{zoom}%</span>
@@ -100,6 +129,36 @@ export default function VideoControls({
             max="200"
             value={saturation}
             onChange={(e) => onChangeSaturation(Number(e.target.value))}
+            className="slider"
+          />
+        </section>
+
+        <section className="settings-group">
+          <div className="settings-row">
+            <h3>Brilho</h3>
+            <span className="settings-value">{brightness}%</span>
+          </div>
+          <input
+            type="range"
+            min="50"
+            max="150"
+            value={brightness}
+            onChange={(e) => onChangeBrightness(Number(e.target.value))}
+            className="slider"
+          />
+        </section>
+
+        <section className="settings-group">
+          <div className="settings-row">
+            <h3>Contraste</h3>
+            <span className="settings-value">{contrast}%</span>
+          </div>
+          <input
+            type="range"
+            min="50"
+            max="150"
+            value={contrast}
+            onChange={(e) => onChangeContrast(Number(e.target.value))}
             className="slider"
           />
         </section>

@@ -10,9 +10,9 @@ export default function ChatPanel({ channelSlug, open, onToggle, controlsVisible
   return (
     <>
       <button
-        className={`chat-toggle ${open ? 'chat-toggle--active' : ''} ${
-          controlsVisible ? '' : 'chat-toggle--hidden'
-        }`}
+        className={`chat-toggle glass glass-btn ${
+          open ? 'glass-btn--active' : ''
+        } ${controlsVisible ? '' : 'chat-toggle--hidden'}`}
         onClick={(e) => {
           e.stopPropagation();
           onToggle();
@@ -23,7 +23,7 @@ export default function ChatPanel({ channelSlug, open, onToggle, controlsVisible
       </button>
 
       <aside
-        className={`chat-panel ${open ? 'chat-panel--open' : ''}`}
+        className={`chat-panel glass glass--overlay ${open ? 'chat-panel--open' : ''}`}
         onClick={(e) => e.stopPropagation()}
       >
         <header className="chat-panel__header">

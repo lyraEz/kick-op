@@ -1,37 +1,17 @@
 .chat-toggle {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: var(--space-3);
+  right: var(--space-3);
   z-index: 30;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  color: #e8e6df;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.15s ease, transform 0.15s ease, border-color 0.15s ease,
-    opacity 0.25s ease;
+  transition: transform var(--duration-fast) var(--ease-glass),
+    background var(--duration-fast) var(--ease-glass),
+    border-color var(--duration-fast) var(--ease-glass),
+    opacity var(--duration-slow) ease;
 }
 
 .chat-toggle--hidden {
   opacity: 0;
   pointer-events: none;
-}
-
-.chat-toggle:hover {
-  border-color: rgba(120, 255, 190, 0.4);
-}
-
-.chat-toggle:active {
-  transform: scale(0.94);
-}
-
-.chat-toggle--active {
-  background: rgba(120, 255, 190, 0.18) !important;
-  border-color: rgba(120, 255, 190, 0.5) !important;
-  color: #78ffbe;
 }
 
 .chat-panel {
@@ -40,16 +20,14 @@
   right: 0;
   bottom: 0;
   width: min(320px, 84vw);
-  background: rgba(12, 14, 18, 0.88);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
-  border-left: 1px solid rgba(255, 255, 255, 0.12);
+  border-left: 1px solid var(--glass-border);
   display: flex;
   flex-direction: column;
   transform: translateX(100%);
-  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform var(--duration-base) var(--ease-glass);
   z-index: 25;
   visibility: hidden;
+  border-radius: 0;
 }
 
 .chat-panel--open {
@@ -60,14 +38,14 @@
 .chat-panel__header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 14px 16px;
-  padding-top: max(14px, env(safe-area-inset-top));
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  padding-top: max(var(--space-4), env(safe-area-inset-top));
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #8a8a85;
+  color: var(--c-ink-dim);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   flex-shrink: 0;
 }
@@ -76,21 +54,19 @@
   flex: 1;
   width: 100%;
   border: none;
-  background: #0c0e12;
-  /* o popout da Kick já vem com fundo escuro próprio, mas isso evita
-     flash branco enquanto carrega */
+  background: transparent;
   color-scheme: dark;
 }
 
 .chat-panel__notice {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  padding: 10px 12px;
-  margin: 10px 12px 0;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  margin: var(--space-3) var(--space-3) 0;
   background: rgba(255, 184, 92, 0.08);
   border: 1px solid rgba(255, 184, 92, 0.2);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   color: #d9b98a;
   flex-shrink: 0;
 }
@@ -103,7 +79,7 @@
 .chat-panel__notice p {
   flex: 1;
   margin: 0;
-  font-size: 11.5px;
+  font-size: var(--text-xs);
   line-height: 1.45;
 }
 

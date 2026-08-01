@@ -1,0 +1,92 @@
+/* ============================================================
+   sinal — Liquid Glass System
+   Um único sistema de vidro usado em toda a aplicação:
+   3 profundidades (base/raised/overlay) x borda especular
+   (o "sinal visual" do projeto — uma borda que sugere luz
+   refratando na quina do vidro, não uma linha reta).
+   ============================================================ */
+
+.glass {
+  position: relative;
+  background: var(--glass-tint-base);
+  backdrop-filter: blur(var(--glass-blur-md)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--glass-blur-md)) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    inset 0 1px 0 var(--glass-specular),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+    0 8px 24px rgba(0, 0, 0, 0.28);
+  isolation: isolate;
+}
+
+/* Borda especular: um arco de luz sutil correndo pela borda superior,
+   simulando refração — a assinatura visual do projeto. Só aparece como
+   um leve brilho, nunca chamativo. */
+.glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0.05) 30%,
+    rgba(255, 255, 255, 0) 55%,
+    rgba(255, 255, 255, 0.08) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.glass--raised {
+  background: var(--glass-tint-raised);
+  backdrop-filter: blur(var(--glass-blur-sm)) saturate(170%);
+  -webkit-backdrop-filter: blur(var(--glass-blur-sm)) saturate(170%);
+}
+
+.glass--overlay {
+  background: var(--glass-tint-overlay);
+  backdrop-filter: blur(var(--glass-blur-lg)) saturate(190%);
+  -webkit-backdrop-filter: blur(var(--glass-blur-lg)) saturate(190%);
+  border-color: var(--glass-border-bright);
+}
+
+/* Botões circulares de glass (voltar, play, mute, config, chat...) */
+.glass-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  color: var(--c-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease-glass),
+    background var(--duration-fast) var(--ease-glass),
+    border-color var(--duration-fast) var(--ease-glass);
+}
+
+.glass-btn:active {
+  transform: scale(0.92);
+}
+
+.glass-btn--sm {
+  width: 34px;
+  height: 34px;
+}
+
+.glass-btn--active {
+  background: rgba(120, 255, 190, 0.18) !important;
+  border-color: rgba(120, 255, 190, 0.5) !important;
+  color: var(--c-live);
+}
+
+.glass-btn--active-warn {
+  background: rgba(255, 184, 92, 0.18) !important;
+  border-color: rgba(255, 184, 92, 0.5) !important;
+  color: var(--c-warn);
+}

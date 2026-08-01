@@ -1,72 +1,114 @@
-import { useState } from 'react';
-import { ArrowRight, Radio, ChevronDown } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { ArrowRight, Radio, ChevronDown, Check, Star, History } from 'lucide-react';
+import { extractSlug } from '../utils/channel';
+import { useChannelHistory } from '../hooks/useChannelHistory';
 import './HomeScreen.css';
-
-function extractSlug(input) {
-  const trimmed = input.trim();
-  if (!trimmed) return '';
-  if (/^[a-zA-Z0-9_-]+$/.test(trimmed)) return trimmed.toLowerCase();
-  try {
-    const url = trimmed.startsWith('http') ? trimmed : `https://${trimmed}`;
-    const parts = new URL(url).pathname.split('/').filter(Boolean);
-    return (parts[0] || '').toLowerCase();
-  } catch {
-    return '';
-  }
-}
 
 export default function HomeScreen({ onSubmit, loading, error }) {
   const [channelInput, setChannelInput] = useState('');
   const [streamUrl, setStreamUrl] = useState('');
   const [howToOpen, setHowToOpen] = useState(false);
 
+  const { recent, favorites, addRecent, toggleFavorite, isFavorite } = useChannelHistory();
+
+  const slug = useMemo(() => extractSlug(channelInput), [channelInput]);
+  const slugValid = channelInput.trim().length > 0 && Boolean(slug);
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    const slug = extractSlug(channelInput);
-    if (streamUrl.trim() && slug) {
-      onSubmit({
-        streamUrl: streamUrl.trim(),
-        channelSlug: slug,
-        channelName: slug,
-      });
-    }
+    if (!streamUrl.trim() || !slug) return;
+    addRecent(slug);
+    onSubmit({ streamUrl: streamUrl.trim(), channelSlug: slug, channelName: slug });
   };
+
+  const pickChannel = (pickedSlug) => {
+    setChannelInput(pickedSlug);
+    document.getElementById('stream-url')?.focus();
+  };
+
+  const savedChannels = useMemo(() => {
+    const favSet = new Set(favorites);
+    const others = recent.filter((s) => !favSet.has(s));
+    return [...favorites.map((s) => ({ slug: s, fav: true })), ...others.map((s) => ({ slug: s, fav: false }))];
+  }, [recent, favorites]);
 
   return (
     <div className="home">
       <div className="home__glow" />
+      <div className="home__glow home__glow--secondary" />
 
       <div className="home__content">
-        <div className="home__mark">
+        <div className="home__mark home__enter" style={{ '--delay': '0ms' }}>
           <Radio size={20} strokeWidth={2.4} />
           <span>sinal</span>
         </div>
 
-        <h1 className="home__title">
+        <h1 className="home__title home__enter" style={{ '--delay': '60ms' }}>
           Cole o link da live.
           <br />
           <span className="home__title-accent">Assista sem travar.</span>
         </h1>
 
-        <p className="home__subtitle">
+        <p className="home__subtitle home__enter" style={{ '--delay': '120ms' }}>
           Player próprio, sem o peso da página da Kick. Qualidade, zoom, saturação e
           chat do seu jeito.
         </p>
 
-        <form className="home__form-stack" onSubmit={handleSubmit}>
+        {savedChannels.length > 0 && (
+          <div className="home__chips home__enter" style={{ '--delay': '160ms' }}>
+            {savedChannels.map(({ slug: s, fav }) => (
+              <button
+                key={s}
+                type="button"
+                className="home__chip glass glass--raised"
+                onClick={() => pickChannel(s)}
+              >
+                {fav ? <Star size={12} className="home__chip-icon--fav" /> : <History size={12} />}
+                {s}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <form
+          className="home__form-stack home__enter"
+          style={{ '--delay': '200ms' }}
+          onSubmit={handleSubmit}
+        >
           <div className="home__field">
             <label htmlFor="channel-input">Canal (link ou nome de usuário)</label>
-            <input
-              id="channel-input"
-              name="channelInput"
-              type="text"
-              autoCapitalize="off"
-              autoCorrect="off"
-              placeholder="kick.com/coringa ou coringa"
-              value={channelInput}
-              onChange={(e) => setChannelInput(e.target.value)}
-              className="home__input glass"
-            />
+            <div className="home__input-row">
+              <div className="home__input-wrap glass">
+                <input
+                  id="channel-input"
+                  name="channelInput"
+                  type="text"
+                  autoCapitalize="off"
+                  autoCorrect="off"
+                  placeholder="kick.com/coringa ou coringa"
+                  value={channelInput}
+                  onChange={(e) => setChannelInput(e.target.value)}
+                  className="home__input"
+                />
+                {slugValid && (
+                  <span className="home__input-check">
+                    <Check size={15} />
+                  </span>
+                )}
+              </div>
+              {slugValid && (
+                <button
+                  type="button"
+                  className={`home__fav-btn glass-btn glass ${
+                    isFavorite(slug) ? 'glass-btn--active' : ''
+                  }`}
+                  onClick={() => toggleFavorite(slug)}
+                  aria-label={isFavorite(slug) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                >
+                  <Star size={16} fill={isFavorite(slug) ? 'currentColor' : 'none'} />
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="home__field">
@@ -81,14 +123,14 @@ export default function HomeScreen({ onSubmit, loading, error }) {
               placeholder="https://.../master.m3u8"
               value={streamUrl}
               onChange={(e) => setStreamUrl(e.target.value)}
-              className="home__input glass"
+              className="home__input home__input--standalone glass"
             />
           </div>
 
           <button
             type="submit"
             className="home__submit-full"
-            disabled={loading || !streamUrl.trim() || !extractSlug(channelInput)}
+            disabled={loading || !streamUrl.trim() || !slug}
           >
             {loading ? <span className="home__spinner" /> : <>Assistir <ArrowRight size={16} /></>}
           </button>
@@ -98,7 +140,8 @@ export default function HomeScreen({ onSubmit, loading, error }) {
 
         <button
           type="button"
-          className="home__howto-toggle"
+          className="home__howto-toggle home__enter"
+          style={{ '--delay': '240ms' }}
           onClick={() => setHowToOpen((v) => !v)}
         >
           <ChevronDown size={14} className={howToOpen ? 'is-open' : ''} />
@@ -123,6 +166,11 @@ export default function HomeScreen({ onSubmit, loading, error }) {
             <li>
               O chat não precisa de nenhum link separado — só o nome do canal,
               que já é usado automaticamente.
+            </li>
+            <li>
+              O link do vídeo expira depois de um tempo, então salvar o canal
+              (☆) só adianta preencher o nome — o link mesmo sempre precisa
+              ser colado na hora.
             </li>
           </ol>
         )}

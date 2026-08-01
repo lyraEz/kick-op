@@ -1,0 +1,82 @@
+/* ============================================================
+   sinal — Design Tokens
+   Fonte única de verdade para cor, tipografia, espaçamento,
+   glass e motion. Todo componente deriva daqui.
+   ============================================================ */
+
+:root {
+  /* — Cor: base — */
+  --c-void: #0a0b0d;
+  --c-void-raised: #101216;
+  --c-ink: #f2f0e8;
+  --c-ink-dim: #8a8a85;
+  --c-ink-faint: #55554f;
+
+  /* — Cor: acento — */
+  --c-live: #78ffbe;
+  --c-live-dim: #4fd99a;
+  --c-warn: #ffb85c;
+  --c-danger: #ff6a5c;
+
+  /* — Glass: camadas —
+     3 profundidades: base (painéis grandes), raised (controles),
+     overlay (modais/tooltips) — cada uma um pouco mais opaca e
+     com blur mais forte que a anterior, pra dar sensação de
+     empilhamento físico real. */
+  --glass-blur-sm: 12px;
+  --glass-blur-md: 20px;
+  --glass-blur-lg: 32px;
+
+  --glass-tint-base: rgba(18, 20, 24, 0.32);
+  --glass-tint-raised: rgba(22, 24, 29, 0.42);
+  --glass-tint-overlay: rgba(14, 16, 20, 0.62);
+
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-border-bright: rgba(255, 255, 255, 0.28);
+  --glass-specular: rgba(255, 255, 255, 0.16);
+
+  /* — Tipografia — */
+  --font-display: 'Fraunces', 'Georgia', serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --text-xs: 11px;
+  --text-sm: 12.5px;
+  --text-base: 14.5px;
+  --text-md: 15px;
+  --text-lg: 18px;
+  --text-xl: clamp(26px, 7vw, 34px);
+  --text-2xl: clamp(30px, 8vw, 42px);
+
+  /* — Espaçamento (escala de 4px) — */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* — Raio — */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
+
+  /* — Motion —
+     Curva única em todo o app: entra rápido, assenta suave.
+     Nada de easing linear (parece robótico) nem bounce
+     (parece brinquedo) — o brief pede "fluido", não "divertido". */
+  --ease-glass: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 0.15s;
+  --duration-base: 0.22s;
+  --duration-slow: 0.4s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
