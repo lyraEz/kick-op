@@ -330,3 +330,32 @@
   color: #ff8a7a;
   font-size: var(--text-base);
 }
+
+.home__details-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--c-ink-dim);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  padding: 0;
+  margin-top: -2px;
+}
+
+.home__details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--glass-border);
+}
+
+.home__details-hint {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--c-ink-faint);
+}

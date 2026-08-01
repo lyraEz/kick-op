@@ -107,6 +107,46 @@
   cursor: default;
 }
 
+.settings-hint {
+  margin: var(--space-2) 0 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--c-ink-dim);
+}
+
+.settings-stats {
+  padding-top: var(--space-3);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.stats-list {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3) var(--space-2);
+}
+
+.stats-list div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stats-list dt {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--c-ink-faint);
+}
+
+.stats-list dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--c-live);
+}
+
 .slider {
   width: 100%;
   -webkit-appearance: none;

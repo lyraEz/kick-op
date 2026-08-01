@@ -5,11 +5,13 @@ import Player from './components/Player';
 function App() {
   const [channel, setChannel] = useState(null);
 
-  const handleSubmit = ({ streamUrl, channelName, channelSlug }) => {
+  const handleSubmit = ({ streamUrl, channelName, channelSlug, title, category }) => {
     setChannel({
       displayName: channelName,
       playbackUrl: streamUrl,
       channelSlug,
+      title,
+      category,
       isLive: true,
     });
   };

@@ -1,4 +1,4 @@
-import { Settings, X } from 'lucide-react';
+import { Settings, X, Activity } from 'lucide-react';
 import { PRESETS } from '../constants/presets';
 import './VideoControls.css';
 
@@ -6,6 +6,8 @@ const FIT_OPTIONS = [
   { value: 'contain', label: 'Original', hint: 'sem cortes' },
   { value: 'fill', label: 'Esticado', hint: 'preenche sem cortar' },
 ];
+
+const SPEED_OPTIONS = [1, 1.1, 1.25, 1.5];
 
 export default function VideoControls({
   levels,
@@ -23,6 +25,19 @@ export default function VideoControls({
   onChangeContrast,
   activePreset,
   onApplyPreset,
+  volume,
+  onChangeVolume,
+  speed,
+  onChangeSpeed,
+  mirrored,
+  onToggleMirror,
+  audioOnly,
+  onToggleAudioOnly,
+  autoSync,
+  onToggleAutoSync,
+  statsVisible,
+  onToggleStats,
+  stats,
   open,
   onToggle,
 }) {
@@ -82,11 +97,35 @@ export default function VideoControls({
                 <span className="chip__hint">{opt.hint}</span>
               </button>
             ))}
+            <button
+              className={`chip ${mirrored ? 'chip--active' : ''}`}
+              onClick={onToggleMirror}
+            >
+              Espelhar
+            </button>
           </div>
         </section>
 
         <section className="settings-group">
-          <h3>Presets</h3>
+          <h3>Velocidade</h3>
+          <div className="settings-chips">
+            {SPEED_OPTIONS.map((s) => (
+              <button
+                key={s}
+                className={`chip ${speed === s ? 'chip--active' : ''}`}
+                onClick={() => onChangeSpeed(s)}
+              >
+                {s === 1 ? 'Normal' : `${s}×`}
+              </button>
+            ))}
+          </div>
+          <p className="settings-hint">
+            Acima de 1× ajuda a alcançar o ao vivo mais rápido sem cortar.
+          </p>
+        </section>
+
+        <section className="settings-group">
+          <h3>Presets de imagem</h3>
           <div className="settings-chips">
             {Object.entries(PRESETS).map(([key, preset]) => (
               <button
@@ -101,6 +140,21 @@ export default function VideoControls({
               <span className="chip chip--custom">Personalizado</span>
             )}
           </div>
+        </section>
+
+        <section className="settings-group">
+          <div className="settings-row">
+            <h3>Volume</h3>
+            <span className="settings-value">{volume}%</span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={volume}
+            onChange={(e) => onChangeVolume(Number(e.target.value))}
+            className="slider"
+          />
         </section>
 
         <section className="settings-group">
@@ -162,6 +216,57 @@ export default function VideoControls({
             className="slider"
           />
         </section>
+
+        <section className="settings-group">
+          <h3>Modo</h3>
+          <div className="settings-chips">
+            <button
+              className={`chip ${audioOnly ? 'chip--active' : ''}`}
+              onClick={onToggleAudioOnly}
+            >
+              Modo economia
+              <span className="chip__hint">força qualidade mínima</span>
+            </button>
+            <button
+              className={`chip ${autoSync ? 'chip--active' : ''}`}
+              onClick={onToggleAutoSync}
+            >
+              Auto-sincronizar
+              <span className="chip__hint">volta ao vivo sozinho</span>
+            </button>
+            <button
+              className={`chip ${statsVisible ? 'chip--active' : ''}`}
+              onClick={onToggleStats}
+            >
+              <Activity size={11} style={{ marginRight: 3 }} />
+              Estatísticas
+            </button>
+          </div>
+        </section>
+
+        {statsVisible && (
+          <section className="settings-group settings-stats">
+            <h3>Estatísticas técnicas</h3>
+            <dl className="stats-list">
+              <div>
+                <dt>Resolução</dt>
+                <dd>{stats.resolution || '—'}</dd>
+              </div>
+              <div>
+                <dt>Bitrate</dt>
+                <dd>{stats.bitrateKbps ? `${stats.bitrateKbps} kbps` : '—'}</dd>
+              </div>
+              <div>
+                <dt>Buffer</dt>
+                <dd>{stats.bufferSeconds != null ? `${stats.bufferSeconds.toFixed(1)}s` : '—'}</dd>
+              </div>
+              <div>
+                <dt>Frames perdidos</dt>
+                <dd>{stats.droppedFrames ?? '—'}</dd>
+              </div>
+            </dl>
+          </section>
+        )}
       </div>
     </>
   );

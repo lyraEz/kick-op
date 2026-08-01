@@ -1,5 +1,13 @@
 import { useState, useMemo } from 'react';
-import { ArrowRight, Radio, ChevronDown, Check, Star, History } from 'lucide-react';
+import {
+  ArrowRight,
+  Radio,
+  ChevronDown,
+  Check,
+  Star,
+  History,
+  Tag,
+} from 'lucide-react';
 import { extractSlug } from '../utils/channel';
 import { useChannelHistory } from '../hooks/useChannelHistory';
 import './HomeScreen.css';
@@ -7,6 +15,9 @@ import './HomeScreen.css';
 export default function HomeScreen({ onSubmit, loading, error }) {
   const [channelInput, setChannelInput] = useState('');
   const [streamUrl, setStreamUrl] = useState('');
+  const [title, setTitle] = useState('');
+  const [category, setCategory] = useState('');
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [howToOpen, setHowToOpen] = useState(false);
 
   const { recent, favorites, addRecent, toggleFavorite, isFavorite } = useChannelHistory();
@@ -18,7 +29,13 @@ export default function HomeScreen({ onSubmit, loading, error }) {
     e.preventDefault();
     if (!streamUrl.trim() || !slug) return;
     addRecent(slug);
-    onSubmit({ streamUrl: streamUrl.trim(), channelSlug: slug, channelName: slug });
+    onSubmit({
+      streamUrl: streamUrl.trim(),
+      channelSlug: slug,
+      channelName: slug,
+      title: title.trim() || null,
+      category: category.trim() || null,
+    });
   };
 
   const pickChannel = (pickedSlug) => {
@@ -126,6 +143,49 @@ export default function HomeScreen({ onSubmit, loading, error }) {
               className="home__input home__input--standalone glass"
             />
           </div>
+
+          <button
+            type="button"
+            className="home__details-toggle"
+            onClick={() => setDetailsOpen((v) => !v)}
+          >
+            <Tag size={12} />
+            {detailsOpen ? 'Ocultar título e categoria' : 'Adicionar título e categoria (opcional)'}
+          </button>
+
+          {detailsOpen && (
+            <div className="home__details">
+              <div className="home__field">
+                <label htmlFor="live-title">Título da live</label>
+                <input
+                  id="live-title"
+                  name="title"
+                  type="text"
+                  placeholder="ex: só resenha hoje"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="home__input home__input--standalone glass"
+                />
+              </div>
+              <div className="home__field">
+                <label htmlFor="live-category">Categoria / jogo</label>
+                <input
+                  id="live-category"
+                  name="category"
+                  type="text"
+                  placeholder="ex: Just Chatting"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="home__input home__input--standalone glass"
+                />
+              </div>
+              <p className="home__details-hint">
+                A Kick bloqueia a busca automática desses dados, então é
+                manual — mas fica salvo só nesta sessão, pra aparecer no
+                player.
+              </p>
+            </div>
+          )}
 
           <button
             type="submit"

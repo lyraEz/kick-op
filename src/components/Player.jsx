@@ -8,6 +8,7 @@ import {
   Maximize,
   Minimize,
   PictureInPicture2,
+  Radio,
 } from 'lucide-react';
 import { useHlsPlayer } from '../hooks/useHlsPlayer';
 import { useIdleControls } from '../hooks/useIdleControls';
@@ -19,10 +20,16 @@ import './Player.css';
 export default function Player({ channel, onBack }) {
   const videoRef = useRef(null);
   const stageRef = useRef(null);
-  const { levels, currentLevel, changeLevel, status, errorMessage } = useHlsPlayer(
-    videoRef,
-    channel.playbackUrl
-  );
+  const {
+    levels,
+    currentLevel,
+    changeLevel,
+    status,
+    errorMessage,
+    isBehindLive,
+    goLive,
+    stats,
+  } = useHlsPlayer(videoRef, channel.playbackUrl);
 
   const [chatOpen, setChatOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -32,6 +39,12 @@ export default function Player({ channel, onBack }) {
   const [brightness, setBrightness] = useState(100);
   const [contrast, setContrast] = useState(100);
   const [activePreset, setActivePreset] = useState('natural');
+  const [volume, setVolume] = useState(100);
+  const [speed, setSpeed] = useState(1);
+  const [mirrored, setMirrored] = useState(false);
+  const [audioOnly, setAudioOnly] = useState(false);
+  const [autoSync, setAutoSync] = useState(false);
+  const [statsVisible, setStatsVisible] = useState(false);
   const [muted, setMuted] = useState(true);
   const [playing, setPlaying] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -51,6 +64,41 @@ export default function Player({ channel, onBack }) {
       typeof document !== 'undefined' && document.pictureInPictureEnabled
     );
   }, []);
+
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.playbackRate = speed;
+  }, [speed]);
+
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.volume = volume / 100;
+  }, [volume]);
+
+  // Auto-sincronizar: se ativado, assim que o player detectar que ficou
+  // atrás do live edge, volta sozinho sem esperar o usuário clicar.
+  useEffect(() => {
+    if (autoSync && isBehindLive && playing) {
+      goLive();
+    }
+  }, [autoSync, isBehindLive, playing, goLive]);
+
+  // "Só áudio" não existe de fato num stream HLS sem faixa de áudio
+  // separada (a Kick não fornece uma) — a aproximação honesta é forçar a
+  // menor qualidade de vídeo disponível, que é o que realmente reduz o
+  // consumo de dados, e esconder a imagem visualmente.
+  const previousLevelRef = useRef(-1);
+  useEffect(() => {
+    if (audioOnly) {
+      previousLevelRef.current = currentLevel;
+      const lowestIndex = levels.reduce(
+        (min, lvl) => (lvl.height < levels[min]?.height ? lvl.index : min),
+        levels[0]?.index ?? -1
+      );
+      if (lowestIndex !== -1) changeLevel(lowestIndex);
+    } else if (previousLevelRef.current !== undefined) {
+      changeLevel(previousLevelRef.current);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [audioOnly]);
 
   const applyPreset = useCallback((key) => {
     const preset = PRESETS[key];
@@ -108,7 +156,17 @@ export default function Player({ channel, onBack }) {
     }
   };
 
+  const handleGoLive = () => {
+    goLive();
+    setPlaying(true);
+  };
+
   const handleStageClick = (e) => {
+    // Guarda explícita: nunca alterna os controles se algum painel estiver
+    // aberto, mesmo que o clique caia numa área "vazia" do stage por trás
+    // dele (evita o bug de conseguir mexer nos controles "por baixo" quando
+    // o painel está tecnicamente sobreposto mas o clique vaza por CSS).
+    if (settingsOpen || chatOpen) return;
     if (e.target === videoRef.current || e.target === stageRef.current) {
       toggleControls();
     }
@@ -127,13 +185,21 @@ export default function Player({ channel, onBack }) {
           className="player-video"
           style={{
             objectFit: fit,
-            transform: zoom !== 100 ? `scale(${zoom / 100})` : undefined,
+            transform: `${zoom !== 100 ? `scale(${zoom / 100}) ` : ''}${
+              mirrored ? 'scaleX(-1)' : ''
+            }`.trim() || undefined,
             filter: `saturate(${saturation}%) brightness(${brightness}%) contrast(${contrast}%)`,
           }}
           playsInline
           muted={muted}
           autoPlay
         />
+
+        {audioOnly && status === 'ready' && (
+          <div className="player-audio-only-badge glass">
+            <Radio size={13} /> Qualidade mínima ativa
+          </div>
+        )}
 
         {status === 'loading' && (
           <div className="player-overlay">
@@ -160,6 +226,25 @@ export default function Player({ channel, onBack }) {
             <ArrowLeft size={18} />
           </button>
 
+          {(channel.title || channel.category) && (
+            <div className="player-meta glass" onClick={(e) => e.stopPropagation()}>
+              {channel.title && <p className="player-meta__title">{channel.title}</p>}
+              {channel.category && <span className="player-meta__tag">{channel.category}</span>}
+            </div>
+          )}
+
+          {isBehindLive && !autoSync && (
+            <button
+              className="go-live-btn glass"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleGoLive();
+              }}
+            >
+              <span className="player-live-dot" /> Ir para o AO VIVO
+            </button>
+          )}
+
           <VideoControls
             levels={levels}
             currentLevel={currentLevel}
@@ -176,6 +261,19 @@ export default function Player({ channel, onBack }) {
             onChangeContrast={manualChange(setContrast)}
             activePreset={activePreset}
             onApplyPreset={applyPreset}
+            volume={volume}
+            onChangeVolume={setVolume}
+            speed={speed}
+            onChangeSpeed={setSpeed}
+            mirrored={mirrored}
+            onToggleMirror={() => setMirrored((v) => !v)}
+            audioOnly={audioOnly}
+            onToggleAudioOnly={() => setAudioOnly((v) => !v)}
+            autoSync={autoSync}
+            onToggleAutoSync={() => setAutoSync((v) => !v)}
+            statsVisible={statsVisible}
+            onToggleStats={() => setStatsVisible((v) => !v)}
+            stats={stats}
             open={settingsOpen}
             onToggle={() => setSettingsOpen((v) => !v)}
           />
