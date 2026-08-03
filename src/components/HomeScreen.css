@@ -359,3 +359,9 @@
   line-height: 1.4;
   color: var(--c-ink-faint);
 }
+
+.home__footer-links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}

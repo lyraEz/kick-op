@@ -4,7 +4,14 @@ import './ChatPanel.css';
 
 const LOAD_TIMEOUT = 7000;
 
-export default function ChatPanel({ channelSlug, open, onToggle, controlsVisible }) {
+export default function ChatPanel({
+  channelSlug,
+  channelOptions,
+  onChangeChannel,
+  open,
+  onToggle,
+  controlsVisible,
+}) {
   const [noticeOpen, setNoticeOpen] = useState(true);
   const [loadState, setLoadState] = useState('loading'); // loading | loaded | timeout
   const [reloadKey, setReloadKey] = useState(0);
@@ -48,7 +55,23 @@ export default function ChatPanel({ channelSlug, open, onToggle, controlsVisible
         onClick={(e) => e.stopPropagation()}
       >
         <header className="chat-panel__header">
-          <span>Chat</span>
+          {channelOptions && channelOptions.length > 1 ? (
+            <div className="chat-panel__channel-switch">
+              {channelOptions.map((slug) => (
+                <button
+                  key={slug}
+                  className={`chat-panel__channel-btn ${
+                    slug === channelSlug ? 'chat-panel__channel-btn--active' : ''
+                  }`}
+                  onClick={() => onChangeChannel?.(slug)}
+                >
+                  {slug}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <span>Chat</span>
+          )}
           <a
             className="chat-panel__external"
             href={popoutUrl}

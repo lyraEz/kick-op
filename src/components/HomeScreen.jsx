@@ -7,12 +7,13 @@ import {
   Star,
   History,
   Tag,
+  Rows,
 } from 'lucide-react';
 import { extractSlug } from '../utils/channel';
 import { useChannelHistory } from '../hooks/useChannelHistory';
 import './HomeScreen.css';
 
-export default function HomeScreen({ onSubmit, loading, error }) {
+export default function HomeScreen({ onSubmit, loading, error, onOpenMultiStream }) {
   const [channelInput, setChannelInput] = useState('');
   const [streamUrl, setStreamUrl] = useState('');
   const [title, setTitle] = useState('');
@@ -198,15 +199,21 @@ export default function HomeScreen({ onSubmit, loading, error }) {
 
         {error && <p className="home__error">{error}</p>}
 
-        <button
-          type="button"
-          className="home__howto-toggle home__enter"
-          style={{ '--delay': '240ms' }}
-          onClick={() => setHowToOpen((v) => !v)}
-        >
-          <ChevronDown size={14} className={howToOpen ? 'is-open' : ''} />
-          Como pegar o link do vídeo
-        </button>
+        <div className="home__footer-links home__enter" style={{ '--delay': '240ms' }}>
+          <button
+            type="button"
+            className="home__howto-toggle"
+            onClick={() => setHowToOpen((v) => !v)}
+          >
+            <ChevronDown size={14} className={howToOpen ? 'is-open' : ''} />
+            Como pegar o link do vídeo
+          </button>
+
+          <button type="button" className="home__howto-toggle" onClick={onOpenMultiStream}>
+            <Rows size={14} />
+            Assistir 2 lives juntas
+          </button>
+        </div>
 
         {howToOpen && (
           <ol className="home__howto">

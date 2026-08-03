@@ -22,20 +22,22 @@
      3 profundidades: base (painéis grandes), raised (controles),
      overlay (modais/tooltips) — cada uma um pouco mais opaca e
      com blur mais forte que a anterior, pra dar sensação de
-     empilhamento físico real. Tint baixo + blur alto = o conteúdo
-     de trás (a live rodando) continua reconhecível através do vidro,
-     em vez de virar um painel escuro genérico. */
-  --glass-blur-sm: 18px;
-  --glass-blur-md: 28px;
-  --glass-blur-lg: 40px;
+     empilhamento físico real. A versão anterior (tint 0.18-0.4) ficou
+     transparente demais e o blur não lia como "vidro" contra fundo
+     variado — confirmado por captura de tela. Valores atuais miram
+     "sólido fosco que deixa ver cor e movimento por trás", não
+     "quase invisível com leve desfoque". */
+  --glass-blur-sm: 24px;
+  --glass-blur-md: 36px;
+  --glass-blur-lg: 48px;
 
-  --glass-tint-base: rgba(18, 20, 24, 0.18);
-  --glass-tint-raised: rgba(22, 24, 29, 0.24);
-  --glass-tint-overlay: rgba(14, 16, 20, 0.4);
+  --glass-tint-base: rgba(16, 18, 22, 0.55);
+  --glass-tint-raised: rgba(20, 22, 27, 0.62);
+  --glass-tint-overlay: rgba(12, 14, 18, 0.72);
 
-  --glass-border: rgba(255, 255, 255, 0.16);
-  --glass-border-bright: rgba(255, 255, 255, 0.3);
-  --glass-specular: rgba(255, 255, 255, 0.22);
+  --glass-border: rgba(255, 255, 255, 0.22);
+  --glass-border-bright: rgba(255, 255, 255, 0.36);
+  --glass-specular: rgba(255, 255, 255, 0.3);
 
   /* — Tipografia — */
   --font-display: 'Fraunces', 'Georgia', serif;

@@ -61,6 +61,30 @@
   color: var(--c-live);
 }
 
+.chat-panel__channel-switch {
+  display: flex;
+  gap: 6px;
+}
+
+.chat-panel__channel-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--c-ink-dim);
+  font-size: 11px;
+  font-family: var(--font-mono);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.chat-panel__channel-btn--active {
+  background: rgba(120, 255, 190, 0.14);
+  border-color: rgba(120, 255, 190, 0.4);
+  color: var(--c-live);
+}
+
 .chat-panel__fallback {
   display: flex;
   flex-direction: column;
