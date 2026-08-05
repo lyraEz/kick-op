@@ -23,6 +23,11 @@
   font-size: var(--text-base);
   font-weight: 600;
   color: var(--c-ink);
+  flex: 1;
+}
+
+.multistream__fullscreen-btn {
+  flex-shrink: 0;
 }
 
 .multistream__grid {

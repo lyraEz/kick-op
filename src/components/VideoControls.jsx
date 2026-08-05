@@ -253,8 +253,16 @@ export default function VideoControls({
                 <dd>{stats.resolution || '—'}</dd>
               </div>
               <div>
+                <dt>FPS</dt>
+                <dd>{stats.fps != null ? stats.fps : '—'}</dd>
+              </div>
+              <div>
                 <dt>Bitrate</dt>
                 <dd>{stats.bitrateKbps ? `${stats.bitrateKbps} kbps` : '—'}</dd>
+              </div>
+              <div>
+                <dt>Latência</dt>
+                <dd>{stats.latencyMs != null ? `${stats.latencyMs}ms` : '—'}</dd>
               </div>
               <div>
                 <dt>Buffer</dt>
@@ -263,6 +271,14 @@ export default function VideoControls({
               <div>
                 <dt>Frames perdidos</dt>
                 <dd>{stats.droppedFrames ?? '—'}</dd>
+              </div>
+              <div>
+                <dt>Frames totais</dt>
+                <dd>{stats.totalFrames ?? '—'}</dd>
+              </div>
+              <div>
+                <dt>Codec</dt>
+                <dd className="stats-list__codec">{stats.codec || '—'}</dd>
               </div>
             </dl>
           </section>

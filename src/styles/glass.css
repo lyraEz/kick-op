@@ -55,6 +55,19 @@
   border-color: var(--glass-border-bright);
 }
 
+/* Variante de baixo blur — para elementos sobrepostos a vídeo tocando
+   (multistream, com 2 streams simultâneos). Blur pesado (24-48px)
+   recalculado a cada frame de vídeo em movimento causa flicker visual
+   real no Chrome — é um problema de compositing conhecido do navegador,
+   não um bug de lógica. A troca é: menos blur, mais opacidade de cor
+   sólida para compensar visualmente, o que fica estável mesmo com o
+   conteúdo de trás mudando o tempo todo. */
+.glass--light {
+  background: rgba(10, 11, 13, 0.78);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
 /* Botões circulares de glass (voltar, play, mute, config, chat...) */
 .glass-btn {
   width: 40px;

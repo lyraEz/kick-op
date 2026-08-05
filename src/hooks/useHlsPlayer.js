@@ -5,6 +5,7 @@ const LIVE_DRIFT_THRESHOLD = 6; // segundos atrás do edge pra considerar "atras
 
 export function useHlsPlayer(videoRef, src) {
   const hlsRef = useRef(null);
+  const prevFrameStatsRef = useRef({ frames: 0, time: 0 });
   const [levels, setLevels] = useState([]); // [{index, height, bitrate, isSource}]
   const [currentLevel, setCurrentLevel] = useState(-1); // -1 = auto
   const [status, setStatus] = useState('idle'); // idle | loading | ready | error
@@ -14,7 +15,11 @@ export function useHlsPlayer(videoRef, src) {
     bitrateKbps: null,
     bufferSeconds: null,
     droppedFrames: null,
+    totalFrames: null,
     resolution: null,
+    fps: null,
+    latencyMs: null,
+    codec: null,
   });
 
   useEffect(() => {
@@ -90,11 +95,38 @@ export function useHlsPlayer(videoRef, src) {
           buffered.length > 0 ? buffered.end(buffered.length - 1) - video.currentTime : null;
         const quality = video.getVideoPlaybackQuality?.();
 
+        // Nem todo manifest da Kick preenche width/height no nível do HLS —
+        // quando isso falta, cai para as dimensões reais decodificadas pelo
+        // próprio elemento <video>, que sempre existem uma vez que o
+        // primeiro frame já foi pintado.
+        const resWidth = activeLevel?.width || video.videoWidth || null;
+        const resHeight = activeLevel?.height || video.videoHeight || null;
+
+        // FPS real: a API só dá o total acumulado de frames decodificados,
+        // então o valor "por segundo" precisa ser calculado como a
+        // diferença entre duas leituras, dividida pelo tempo entre elas —
+        // não existe um campo pronto de "fps atual".
+        let fps = null;
+        if (quality) {
+          const now = performance.now();
+          const prev = prevFrameStatsRef.current;
+          const frameDelta = quality.totalVideoFrames - prev.frames;
+          const timeDeltaSec = (now - prev.time) / 1000;
+          if (prev.time > 0 && timeDeltaSec > 0) {
+            fps = Math.round(frameDelta / timeDeltaSec);
+          }
+          prevFrameStatsRef.current = { frames: quality.totalVideoFrames, time: now };
+        }
+
         setStats({
           bitrateKbps: activeLevel ? Math.round(activeLevel.bitrate / 1000) : null,
           bufferSeconds: bufferSeconds != null ? Math.max(0, bufferSeconds) : null,
           droppedFrames: quality ? quality.droppedVideoFrames : null,
-          resolution: activeLevel ? `${activeLevel.width}×${activeLevel.height}` : null,
+          totalFrames: quality ? quality.totalVideoFrames : null,
+          resolution: resWidth && resHeight ? `${resWidth}×${resHeight}` : null,
+          fps,
+          latencyMs: hls.latency != null ? Math.round(hls.latency * 1000) : null,
+          codec: activeLevel?.videoCodec || null,
         });
       }, 2000);
 

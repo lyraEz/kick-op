@@ -147,6 +147,11 @@
   color: var(--c-live);
 }
 
+.stats-list__codec {
+  font-size: 10px;
+  word-break: break-all;
+}
+
 .slider {
   width: 100%;
   -webkit-appearance: none;

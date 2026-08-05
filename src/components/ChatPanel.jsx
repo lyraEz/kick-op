@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Info, ExternalLink, RotateCw } from 'lucide-react';
 import './ChatPanel.css';
 
-const LOAD_TIMEOUT = 7000;
+const LOAD_TIMEOUT = 5000;
 
 export default function ChatPanel({
   channelSlug,
@@ -39,7 +39,7 @@ export default function ChatPanel({
     <>
       <button
         className={`chat-toggle glass glass-btn ${
-          open ? 'glass-btn--active' : ''
+          open ? 'chat-toggle--open glass-btn--active' : ''
         } ${controlsVisible ? '' : 'chat-toggle--hidden'}`}
         onClick={(e) => {
           e.stopPropagation();
@@ -72,12 +72,21 @@ export default function ChatPanel({
           ) : (
             <span>Chat</span>
           )}
+          <button
+            className="chat-panel__external"
+            onClick={retry}
+            aria-label="Recarregar chat"
+            title="Recarregar chat"
+          >
+            <RotateCw size={13} />
+          </button>
           <a
             className="chat-panel__external"
             href={popoutUrl}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Abrir chat em nova aba"
+            title="Abrir em nova aba (para login)"
           >
             <ExternalLink size={13} />
           </a>

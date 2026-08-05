@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { ArrowLeft, Plus } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { ArrowLeft, Plus, Maximize, Minimize } from 'lucide-react';
 import MiniPlayer from './MiniPlayer';
 import ChatPanel from './ChatPanel';
 import './MultiStream.css';
@@ -8,6 +8,7 @@ import './MultiStream.css';
 // realista em celular médio, decodificar 3-4 HLS simultâneos aquece e
 // consome bateria rápido demais para valer a pena.
 export default function MultiStream({ onBack }) {
+  const containerRef = useRef(null);
   const [slots, setSlots] = useState([null, null]);
   const [audioSlot, setAudioSlot] = useState(0);
   const [chatOpen, setChatOpen] = useState(false);
@@ -15,6 +16,21 @@ export default function MultiStream({ onBack }) {
   const [addingSlot, setAddingSlot] = useState(null);
   const [formStream, setFormStream] = useState('');
   const [formChannel, setFormChannel] = useState('');
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const handleChange = () => setIsFullscreen(Boolean(document.fullscreenElement));
+    document.addEventListener('fullscreenchange', handleChange);
+    return () => document.removeEventListener('fullscreenchange', handleChange);
+  }, []);
+
+  const toggleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      containerRef.current?.requestFullscreen?.().catch(() => {});
+    } else {
+      document.exitFullscreen?.();
+    }
+  }, []);
 
   const filledSlots = slots.filter(Boolean);
   const channelOptions = filledSlots.map((s) => s.channelSlug);
@@ -49,7 +65,7 @@ export default function MultiStream({ onBack }) {
   };
 
   return (
-    <div className="multistream">
+    <div className="multistream" ref={containerRef}>
       <header className="multistream__header glass">
         <button
           className="glass-btn"
@@ -60,6 +76,14 @@ export default function MultiStream({ onBack }) {
           <ArrowLeft size={18} />
         </button>
         <span className="multistream__title">2 lives ao mesmo tempo</span>
+        <button
+          className="glass-btn multistream__fullscreen-btn"
+          onClick={toggleFullscreen}
+          aria-label={isFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
+          style={{ background: 'transparent', border: 'none' }}
+        >
+          {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
+        </button>
       </header>
 
       <div className="multistream__grid">

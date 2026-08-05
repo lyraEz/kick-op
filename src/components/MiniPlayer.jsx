@@ -30,21 +30,21 @@ export default function MiniPlayer({ channel, hasAudio, onRequestAudio, onRemove
       )}
 
       <div className="mini-player__chrome">
-        <div className="mini-player__label glass">
+        <div className="mini-player__label glass glass--light">
           <span className="player-live-dot" />
           {channel.displayName}
         </div>
 
         <div className="mini-player__actions">
           <button
-            className={`glass glass-btn glass-btn--sm ${hasAudio ? 'glass-btn--active' : ''}`}
+            className={`glass glass--light glass-btn glass-btn--sm ${hasAudio ? 'glass-btn--active' : ''}`}
             onClick={onRequestAudio}
             aria-label={hasAudio ? 'Com áudio' : 'Ativar áudio deste stream'}
           >
             {hasAudio ? <Volume2 size={15} /> : <VolumeX size={15} />}
           </button>
           <button
-            className="glass glass-btn glass-btn--sm"
+            className="glass glass--light glass-btn glass-btn--sm"
             onClick={onRemove}
             aria-label="Remover stream"
           >

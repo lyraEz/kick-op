@@ -11,6 +11,8 @@ import {
 } from 'lucide-react';
 import { extractSlug } from '../utils/channel';
 import { useChannelHistory } from '../hooks/useChannelHistory';
+import LiquidGlassFilterDefs from './LiquidGlassFilterDefs';
+import LiquidGlassSurface from './LiquidGlassSurface';
 import './HomeScreen.css';
 
 export default function HomeScreen({ onSubmit, loading, error, onOpenMultiStream }) {
@@ -52,6 +54,7 @@ export default function HomeScreen({ onSubmit, loading, error, onOpenMultiStream
 
   return (
     <div className="home">
+      <LiquidGlassFilterDefs />
       <div className="home__glow" />
       <div className="home__glow home__glow--secondary" />
 
@@ -75,15 +78,16 @@ export default function HomeScreen({ onSubmit, loading, error, onOpenMultiStream
         {savedChannels.length > 0 && (
           <div className="home__chips home__enter" style={{ '--delay': '160ms' }}>
             {savedChannels.map(({ slug: s, fav }) => (
-              <button
+              <LiquidGlassSurface
+                as="button"
                 key={s}
                 type="button"
-                className="home__chip glass glass--raised"
+                className="home__chip"
                 onClick={() => pickChannel(s)}
               >
                 {fav ? <Star size={12} className="home__chip-icon--fav" /> : <History size={12} />}
                 {s}
-              </button>
+              </LiquidGlassSurface>
             ))}
           </div>
         )}
@@ -115,16 +119,15 @@ export default function HomeScreen({ onSubmit, loading, error, onOpenMultiStream
                 )}
               </div>
               {slugValid && (
-                <button
+                <LiquidGlassSurface
+                  as="button"
                   type="button"
-                  className={`home__fav-btn glass-btn glass ${
-                    isFavorite(slug) ? 'glass-btn--active' : ''
-                  }`}
+                  className={`home__fav-btn glass-btn ${isFavorite(slug) ? 'glass-btn--active' : ''}`}
                   onClick={() => toggleFavorite(slug)}
                   aria-label={isFavorite(slug) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
                 >
                   <Star size={16} fill={isFavorite(slug) ? 'currentColor' : 'none'} />
-                </button>
+                </LiquidGlassSurface>
               )}
             </div>
           </div>

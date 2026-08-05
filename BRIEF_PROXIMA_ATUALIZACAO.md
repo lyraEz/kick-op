@@ -1,5 +1,10 @@
 # Brief — Próxima mega atualização do "sinal" (a virar "Klarity")
 
+**STATUS: Tarefas 1, 2 e 4 concluídas e validadas com screenshot real
+(Puppeteer + Chrome disponível no ambiente desta sessão — algo que não
+era possível nas sessões anteriores). Detalhes de cada uma no final deste
+documento, antes da seção "Tarefa 5".**
+
 Consolidado ao final de uma sessão longa de desenvolvimento, para retomar
 diretamente na implementação assim que o limite de uso resetar. Tudo aqui
 já foi discutido e está em consenso com o usuário (LyraEz,
@@ -148,7 +153,51 @@ sem travar/esquentar/gastar bateria demais). Decisões já tomadas:
 
 Prioridade: depois da Tarefa 1 (glass) e Tarefa 2 (extensão), não antes.
 
-## Tarefa 5 — Adiado explicitamente para depois (não fazer ainda)
+## Conclusão das Tarefas 1, 2 e 4 (feito nesta sessão)
+
+**Tarefa 1 — Glass sólido**: causa raiz era tint fraco demais (0.18-0.4)
+e blur baixo demais (18-28px). Corrigido para tint 0.55-0.72 e blur
+24-48px conforme a camada, em `src/styles/tokens.css`. Validado com
+screenshot real (Home e Player simulados) — efeito de vidro fosco nítido,
+pegando cor/movimento de trás, confirmado visualmente, não só por leitura
+de CSS.
+
+**Tarefa 2 — Extensão + auto-preenchimento**: extensão nova em
+`/home/claude/klarity-grabber/` (README próprio lá dentro), focada em
+`kick.com`, com botão flutuante que só habilita quando o `.m3u8` real é
+capturado via interceptação de fetch/XHR/`<video>` no contexto da página
+(mesma técnica da extensão original do usuário, só que sem WebSocket
+genérico — não precisa mais, chat é iframe). Popup com estado e campo
+para configurar a URL do Klarity (importante para quando migrar de
+Workers para Pages). No site, `App.jsx` lê `?stream=` e `?channel=` da
+query string e auto-inicia o player, limpando a URL depois. Testado de
+ponta a ponta com screenshot: URL de teste com parâmetros → player entra
+direto em "Conectando à transmissão" sem passar pela Home.
+
+**Tarefa 4 — Multistream de 2**: já estava praticamente pronta ao
+retomar esta sessão (não está claro se foi implementada antes de uma
+interrupção de ferramentas ou nesta mesma sessão — o histórico da
+conversa não deixa isso explícito, então não assumir automaticamente
+"trabalho ainda em andamento" da próxima vez, ela JÁ EXISTE). Componentes:
+`MultiStream.jsx` (2 slots, modal de adicionar canal, áudio mutuamente
+exclusivo), `MiniPlayer.jsx` + `useMiniHlsPlayer.js` (versão enxuta do
+player, `capLevelToPlayerSize: true` para economizar recursos
+automaticamente numa tela menor), `ChatPanel.jsx` já estendido com
+`channelOptions`/`onChangeChannel` para o seletor de canal do chat
+compartilhado. Empilha vertical em retrato, lado a lado via
+`@media (orientation: landscape)`. Acesso pela Home via botão "Assistir 2
+lives juntas". Validado com screenshot: tela vazia com 2 slots e modal de
+adicionar, ambos com glass renderizando corretamente.
+
+Build e lint (`npm run build`, `npm run lint`) limpos em zero warnings
+para todas as três tarefas. Worker testado localmente com
+`wrangler dev`, respondendo 200.
+
+Entregáveis desta sessão: `sinal-kick-player.zip` (projeto completo) e
+`klarity-grabber-extension.zip` (extensão pronta para carregar via modo
+desenvolvedor).
+
+
 
 O usuário foi claro que estas ficam para quando o site estiver "quase
 pronto pra deploy ao público" — não fazer agora, só manter registrado:

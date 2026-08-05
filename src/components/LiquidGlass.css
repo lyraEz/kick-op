@@ -1,0 +1,29 @@
+/* ============================================================
+   Liquid Glass — Refração real (piloto, Home apenas)
+   Usa o filtro SVG definido em LiquidGlassFilterDefs.jsx como
+   backdrop-filter — só funciona no Chrome/Chromium. Nos demais
+   navegadores, LiquidGlassSurface aplica .glass (blur tradicional)
+   automaticamente, então este arquivo só afeta quem tem suporte.
+   ============================================================ */
+
+.liquid-glass-surface--refractive {
+  position: relative;
+  background: rgba(16, 18, 22, 0.22);
+  backdrop-filter: url(#liquid-glass-refraction);
+  -webkit-backdrop-filter: url(#liquid-glass-refraction);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+    0 8px 24px rgba(0, 0, 0, 0.28);
+  isolation: isolate;
+  transition: transform var(--duration-fast, 0.15s) ease;
+}
+
+/* Leve resposta a interação — reforça a sensação de "lente física" que
+   reage ao toque, sem exigir rastrear a posição do ponteiro em tempo
+   real (isso exigiria recalcular o displacement map a cada movimento,
+   caro demais para valer a pena aqui). */
+.liquid-glass-surface--refractive:active {
+  transform: scale(0.98);
+}

@@ -6,7 +6,22 @@
   transition: transform var(--duration-fast) var(--ease-glass),
     background var(--duration-fast) var(--ease-glass),
     border-color var(--duration-fast) var(--ease-glass),
-    opacity var(--duration-slow) ease;
+    opacity var(--duration-slow) ease,
+    right var(--duration-base) var(--ease-glass);
+}
+
+/* Quando o painel abre, ele ocupa a faixa direita da tela — se o toggle
+   continuasse em right: 12px, ficaria colado nos botões do header
+   (recarregar / abrir em nova aba), sobrepondo visualmente os dois.
+   Desloca o toggle para fora dessa faixa, à esquerda do painel. */
+.chat-toggle--open {
+  right: calc(min(320px, 84vw) + var(--space-3));
+}
+
+@media (min-width: 900px) {
+  .chat-toggle--open {
+    right: calc(320px + var(--space-3));
+  }
 }
 
 .chat-toggle--hidden {
@@ -50,10 +65,18 @@
   flex-shrink: 0;
 }
 
+.chat-panel__header > span,
+.chat-panel__header > div {
+  margin-right: auto;
+}
+
 .chat-panel__external {
-  margin-left: auto;
+  background: none;
+  border: none;
+  padding: 0;
   color: var(--c-ink-dim);
   display: flex;
+  cursor: pointer;
   transition: color var(--duration-fast) ease;
 }
 
