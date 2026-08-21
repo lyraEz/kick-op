@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Info, ExternalLink, RotateCw } from 'lucide-react';
+import { MessageCircle, X, RotateCw } from 'lucide-react';
 import './ChatPanel.css';
 
 const LOAD_TIMEOUT = 5000;
+const AUTO_RELOAD_DELAY = 1500;
 
 export default function ChatPanel({
   channelSlug,
@@ -12,10 +13,10 @@ export default function ChatPanel({
   onToggle,
   controlsVisible,
 }) {
-  const [noticeOpen, setNoticeOpen] = useState(true);
   const [loadState, setLoadState] = useState('loading'); // loading | loaded | timeout
   const [reloadKey, setReloadKey] = useState(0);
   const timeoutRef = useRef(null);
+  const autoReloadRef = useRef(null);
 
   const popoutUrl = `https://kick.com/popout/${channelSlug}/chat`;
 
@@ -29,6 +30,21 @@ export default function ChatPanel({
     return () => clearTimeout(timeoutRef.current);
   }, [channelSlug, reloadKey]);
 
+  // Quando o chat trava (timeout ou a própria página de erro carregando
+  // dentro do iframe), recarrega sozinho depois de um instante — o
+  // usuário não precisa perceber que sumiu nem clicar em nada. Se
+  // recarregar de novo e travar de novo, tenta de novo (o setLoadState
+  // no efeito acima reinicia o ciclo a cada reloadKey).
+  useEffect(() => {
+    if (loadState === 'timeout') {
+      clearTimeout(autoReloadRef.current);
+      autoReloadRef.current = setTimeout(() => {
+        setReloadKey((k) => k + 1);
+      }, AUTO_RELOAD_DELAY);
+    }
+    return () => clearTimeout(autoReloadRef.current);
+  }, [loadState]);
+
   const retry = () => {
     setReloadKey((k) => k + 1);
   };
@@ -39,7 +55,7 @@ export default function ChatPanel({
     <>
       <button
         className={`chat-toggle glass glass-btn ${
-          open ? 'chat-toggle--open glass-btn--active' : ''
+          open ? 'glass-btn--active' : ''
         } ${controlsVisible ? '' : 'chat-toggle--hidden'}`}
         onClick={(e) => {
           e.stopPropagation();
@@ -80,52 +96,12 @@ export default function ChatPanel({
           >
             <RotateCw size={13} />
           </button>
-          <a
-            className="chat-panel__external"
-            href={popoutUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Abrir chat em nova aba"
-            title="Abrir em nova aba (para login)"
-          >
-            <ExternalLink size={13} />
-          </a>
         </header>
-
-        {noticeOpen && (
-          <div className="chat-panel__notice">
-            <Info size={13} />
-            <p>
-              Login e envio de mensagem dependem do seu navegador permitir
-              cookies de terceiros pra kick.com. Se não carregar, use o atalho
-              de abrir em nova aba acima.
-            </p>
-            <button
-              onClick={() => setNoticeOpen(false)}
-              aria-label="Dispensar aviso"
-            >
-              <X size={13} />
-            </button>
-          </div>
-        )}
 
         {loadState === 'timeout' && (
           <div className="chat-panel__fallback">
-            <p>
-              O chat embutido não respondeu. Pode ser bloqueio de cookies de
-              terceiros do seu navegador.
-            </p>
-            <button className="chat-panel__retry" onClick={retry}>
-              <RotateCw size={13} /> Tentar de novo
-            </button>
-            <a
-              className="chat-panel__retry chat-panel__retry--link"
-              href={popoutUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <ExternalLink size={13} /> Abrir em nova aba
-            </a>
+            <div className="chat-panel__fallback-spinner" />
+            <p>Reconectando o chat…</p>
           </div>
         )}
 

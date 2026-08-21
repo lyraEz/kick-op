@@ -23,6 +23,10 @@ export default function VideoControls({
   onChangeBrightness,
   contrast,
   onChangeContrast,
+  sharpness,
+  onChangeSharpness,
+  denoise,
+  onChangeDenoise,
   activePreset,
   onApplyPreset,
   volume,
@@ -215,6 +219,45 @@ export default function VideoControls({
             onChange={(e) => onChangeContrast(Number(e.target.value))}
             className="slider"
           />
+        </section>
+
+        <section className="settings-group">
+          <div className="settings-row">
+            <h3>Nitidez</h3>
+            <span className="settings-value">{sharpness}%</span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={sharpness}
+            onChange={(e) => onChangeSharpness(Number(e.target.value))}
+            className="slider"
+          />
+          <p className="settings-hint">
+            Realça bordas e detalhes finos — ajuda quando o vídeo parece mais
+            "mole" do que a qualidade selecionada sugere. Não aumenta a
+            resolução real.
+          </p>
+        </section>
+
+        <section className="settings-group">
+          <div className="settings-row">
+            <h3>Redução de ruído</h3>
+            <span className="settings-value">{denoise}%</span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={denoise}
+            onChange={(e) => onChangeDenoise(Number(e.target.value))}
+            className="slider"
+          />
+          <p className="settings-hint">
+            Suaviza banding/blocos de compressão em áreas planas (céu,
+            sombras). Use com moderação — em excesso borra texto na tela.
+          </p>
         </section>
 
         <section className="settings-group">

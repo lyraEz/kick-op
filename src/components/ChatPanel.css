@@ -6,22 +6,7 @@
   transition: transform var(--duration-fast) var(--ease-glass),
     background var(--duration-fast) var(--ease-glass),
     border-color var(--duration-fast) var(--ease-glass),
-    opacity var(--duration-slow) ease,
-    right var(--duration-base) var(--ease-glass);
-}
-
-/* Quando o painel abre, ele ocupa a faixa direita da tela — se o toggle
-   continuasse em right: 12px, ficaria colado nos botões do header
-   (recarregar / abrir em nova aba), sobrepondo visualmente os dois.
-   Desloca o toggle para fora dessa faixa, à esquerda do painel. */
-.chat-toggle--open {
-  right: calc(min(320px, 84vw) + var(--space-3));
-}
-
-@media (min-width: 900px) {
-  .chat-toggle--open {
-    right: calc(320px + var(--space-3));
-  }
+    opacity var(--duration-slow) ease;
 }
 
 .chat-toggle--hidden {
@@ -111,6 +96,7 @@
 .chat-panel__fallback {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: var(--space-3);
   padding: var(--space-6) var(--space-4);
   text-align: center;
@@ -123,25 +109,19 @@
   line-height: 1.5;
 }
 
-.chat-panel__retry {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 10px 14px;
-  border-radius: var(--radius-sm);
-  background: rgba(120, 255, 190, 0.1);
-  border: 1px solid rgba(120, 255, 190, 0.3);
-  color: var(--c-live);
-  font-size: var(--text-sm);
-  cursor: pointer;
-  text-decoration: none;
+.chat-panel__fallback-spinner {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-top-color: var(--c-live);
+  animation: chat-spin 0.8s linear infinite;
 }
 
-.chat-panel__retry--link {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: var(--glass-border);
-  color: var(--c-ink);
+@keyframes chat-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .chat-panel__frame {
@@ -150,41 +130,6 @@
   border: none;
   background: transparent;
   color-scheme: dark;
-}
-
-.chat-panel__notice {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-2);
-  padding: var(--space-3);
-  margin: var(--space-3) var(--space-3) 0;
-  background: rgba(255, 184, 92, 0.08);
-  border: 1px solid rgba(255, 184, 92, 0.2);
-  border-radius: var(--radius-sm);
-  color: #d9b98a;
-  flex-shrink: 0;
-}
-
-.chat-panel__notice svg:first-child {
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.chat-panel__notice p {
-  flex: 1;
-  margin: 0;
-  font-size: var(--text-xs);
-  line-height: 1.45;
-}
-
-.chat-panel__notice button {
-  flex-shrink: 0;
-  background: none;
-  border: none;
-  color: #9a9a94;
-  cursor: pointer;
-  padding: 2px;
-  display: flex;
 }
 
 @media (min-width: 900px) {

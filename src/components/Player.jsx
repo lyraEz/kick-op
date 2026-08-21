@@ -12,8 +12,10 @@ import {
 } from 'lucide-react';
 import { useHlsPlayer } from '../hooks/useHlsPlayer';
 import { useIdleControls } from '../hooks/useIdleControls';
+import { useVideoPreferences } from '../hooks/useVideoPreferences';
 import ChatPanel from './ChatPanel';
 import VideoControls from './VideoControls';
+import { SharpenFilterDefs, DenoiseFilterDefs } from './ImageEnhanceFilterDefs';
 import { PRESETS } from '../constants/presets';
 import './Player.css';
 
@@ -31,20 +33,24 @@ export default function Player({ channel, onBack }) {
     stats,
   } = useHlsPlayer(videoRef, channel.playbackUrl);
 
+  const { prefs, update: updatePref, updateMany: updatePrefs } = useVideoPreferences();
+
   const [chatOpen, setChatOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [fit, setFit] = useState('contain');
-  const [zoom, setZoom] = useState(100);
-  const [saturation, setSaturation] = useState(100);
-  const [brightness, setBrightness] = useState(100);
-  const [contrast, setContrast] = useState(100);
-  const [activePreset, setActivePreset] = useState('natural');
-  const [volume, setVolume] = useState(100);
-  const [speed, setSpeed] = useState(1);
-  const [mirrored, setMirrored] = useState(false);
-  const [audioOnly, setAudioOnly] = useState(false);
-  const [autoSync, setAutoSync] = useState(false);
-  const [statsVisible, setStatsVisible] = useState(false);
+  const [fit, setFit] = useState(prefs.fit);
+  const [zoom, setZoom] = useState(prefs.zoom);
+  const [saturation, setSaturation] = useState(prefs.saturation);
+  const [brightness, setBrightness] = useState(prefs.brightness);
+  const [contrast, setContrast] = useState(prefs.contrast);
+  const [sharpness, setSharpness] = useState(prefs.sharpness);
+  const [denoise, setDenoise] = useState(prefs.denoise);
+  const [activePreset, setActivePreset] = useState(prefs.activePreset);
+  const [volume, setVolume] = useState(prefs.volume);
+  const [speed, setSpeed] = useState(prefs.speed);
+  const [mirrored, setMirrored] = useState(prefs.mirrored);
+  const [audioOnly, setAudioOnly] = useState(prefs.audioOnly);
+  const [autoSync, setAutoSync] = useState(prefs.autoSync);
+  const [statsVisible, setStatsVisible] = useState(prefs.statsVisible);
   const [muted, setMuted] = useState(true);
   const [playing, setPlaying] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -52,6 +58,56 @@ export default function Player({ channel, onBack }) {
 
   const { visible: controlsVisible, show: showControls, toggle: toggleControls } =
     useIdleControls(settingsOpen || chatOpen);
+
+  // Cada setter de preferência de vídeo atualiza o estado local (efeito
+  // imediato na tela) e persiste no localStorage (efeito na próxima
+  // sessão) — as duas coisas juntas, pra não ter que lembrar de chamar
+  // updatePref em todo canto que hoje chama setFit/setZoom/etc.
+  const setFitPersisted = useCallback(
+    (v) => {
+      setFit(v);
+      updatePref('fit', v);
+    },
+    [updatePref]
+  );
+  const setVolumePersisted = useCallback(
+    (v) => {
+      setVolume(v);
+      updatePref('volume', v);
+    },
+    [updatePref]
+  );
+  const setSpeedPersisted = useCallback(
+    (v) => {
+      setSpeed(v);
+      updatePref('speed', v);
+    },
+    [updatePref]
+  );
+  const toggleMirroredPersisted = useCallback(() => {
+    setMirrored((v) => {
+      updatePref('mirrored', !v);
+      return !v;
+    });
+  }, [updatePref]);
+  const toggleAudioOnlyPersisted = useCallback(() => {
+    setAudioOnly((v) => {
+      updatePref('audioOnly', !v);
+      return !v;
+    });
+  }, [updatePref]);
+  const toggleAutoSyncPersisted = useCallback(() => {
+    setAutoSync((v) => {
+      updatePref('autoSync', !v);
+      return !v;
+    });
+  }, [updatePref]);
+  const toggleStatsPersisted = useCallback(() => {
+    setStatsVisible((v) => {
+      updatePref('statsVisible', !v);
+      return !v;
+    });
+  }, [updatePref]);
 
   useEffect(() => {
     const handleChange = () => setIsFullscreen(Boolean(document.fullscreenElement));
@@ -100,22 +156,53 @@ export default function Player({ channel, onBack }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audioOnly]);
 
-  const applyPreset = useCallback((key) => {
-    const preset = PRESETS[key];
-    if (!preset) return;
-    setSaturation(preset.saturation);
-    setBrightness(preset.brightness);
-    setContrast(preset.contrast);
-    setActivePreset(key);
-  }, []);
+  const applyPreset = useCallback(
+    (key) => {
+      const preset = PRESETS[key];
+      if (!preset) return;
+      setSaturation(preset.saturation);
+      setBrightness(preset.brightness);
+      setContrast(preset.contrast);
+      setActivePreset(key);
+      updatePrefs({
+        saturation: preset.saturation,
+        brightness: preset.brightness,
+        contrast: preset.contrast,
+        activePreset: key,
+      });
+    },
+    [updatePrefs]
+  );
 
   // Qualquer ajuste manual num slider de imagem tira do preset atual e
   // marca como "Personalizado" — não faz sentido continuar mostrando
-  // "Cinema" selecionado se o usuário já mudou o valor.
-  const manualChange = (setter) => (value) => {
+  // "Cinema" selecionado se o usuário já mudou o valor. Também persiste
+  // o valor e o novo estado de preset juntos.
+  const manualChange = (setter, key) => (value) => {
     setter(value);
     setActivePreset('custom');
+    updatePrefs({ [key]: value, activePreset: 'custom' });
   };
+
+  // Nitidez e redução de ruído são correções de percepção de qualidade,
+  // não estilo de cor — diferente de saturação/brilho/contraste, elas
+  // não fazem parte do conceito de "preset", então mexer nelas não
+  // desmarca o preset de cor escolhido.
+  const sharpnessChange = useCallback(
+    (value) => {
+      setSharpness(value);
+      updatePref('sharpness', value);
+    },
+    [updatePref]
+  );
+
+  const denoiseChange = useCallback(
+    (value) => {
+      setDenoise(value);
+      updatePref('denoise', value);
+    },
+    [updatePref]
+  );
 
   const toggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {
@@ -180,6 +267,9 @@ export default function Player({ channel, onBack }) {
         onClick={handleStageClick}
         onMouseMove={showControls}
       >
+        <DenoiseFilterDefs strength={denoise} />
+        <SharpenFilterDefs strength={sharpness} />
+
         <video
           ref={videoRef}
           className="player-video"
@@ -188,7 +278,9 @@ export default function Player({ channel, onBack }) {
             transform: `${zoom !== 100 ? `scale(${zoom / 100}) ` : ''}${
               mirrored ? 'scaleX(-1)' : ''
             }`.trim() || undefined,
-            filter: `saturate(${saturation}%) brightness(${brightness}%) contrast(${contrast}%)`,
+            filter: `${denoise > 0 ? 'url(#klarity-denoise) ' : ''}${
+              sharpness > 0 ? 'url(#klarity-sharpen) ' : ''
+            }saturate(${saturation}%) brightness(${brightness}%) contrast(${contrast}%)`,
           }}
           playsInline
           muted={muted}
@@ -250,29 +342,33 @@ export default function Player({ channel, onBack }) {
             currentLevel={currentLevel}
             onChangeLevel={changeLevel}
             fit={fit}
-            onChangeFit={setFit}
+            onChangeFit={setFitPersisted}
             zoom={zoom}
-            onChangeZoom={manualChange(setZoom)}
+            onChangeZoom={manualChange(setZoom, 'zoom')}
             saturation={saturation}
-            onChangeSaturation={manualChange(setSaturation)}
+            onChangeSaturation={manualChange(setSaturation, 'saturation')}
             brightness={brightness}
-            onChangeBrightness={manualChange(setBrightness)}
+            onChangeBrightness={manualChange(setBrightness, 'brightness')}
             contrast={contrast}
-            onChangeContrast={manualChange(setContrast)}
+            onChangeContrast={manualChange(setContrast, 'contrast')}
+            sharpness={sharpness}
+            onChangeSharpness={sharpnessChange}
+            denoise={denoise}
+            onChangeDenoise={denoiseChange}
             activePreset={activePreset}
             onApplyPreset={applyPreset}
             volume={volume}
-            onChangeVolume={setVolume}
+            onChangeVolume={setVolumePersisted}
             speed={speed}
-            onChangeSpeed={setSpeed}
+            onChangeSpeed={setSpeedPersisted}
             mirrored={mirrored}
-            onToggleMirror={() => setMirrored((v) => !v)}
+            onToggleMirror={toggleMirroredPersisted}
             audioOnly={audioOnly}
-            onToggleAudioOnly={() => setAudioOnly((v) => !v)}
+            onToggleAudioOnly={toggleAudioOnlyPersisted}
             autoSync={autoSync}
-            onToggleAutoSync={() => setAutoSync((v) => !v)}
+            onToggleAutoSync={toggleAutoSyncPersisted}
             statsVisible={statsVisible}
-            onToggleStats={() => setStatsVisible((v) => !v)}
+            onToggleStats={toggleStatsPersisted}
             stats={stats}
             open={settingsOpen}
             onToggle={() => setSettingsOpen((v) => !v)}
