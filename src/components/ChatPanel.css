@@ -41,6 +41,12 @@
   gap: var(--space-2);
   padding: var(--space-4);
   padding-top: max(var(--space-4), env(safe-area-inset-top));
+  /* Reserva espaço à direita do tamanho do chat-toggle fixo (40px) + a
+     margem que ele tem da borda (--space-3) + um respiro — o toggle fica
+     posicionado fixo na tela toda, não dentro deste header, então sem
+     essa reserva os botões do header e o toggle ocupam a mesma coluna
+     visual quando o painel está aberto. */
+  padding-right: calc(40px + var(--space-3) + var(--space-2));
   font-family: var(--font-mono);
   font-size: var(--text-sm);
   letter-spacing: 0.08em;

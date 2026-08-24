@@ -256,7 +256,8 @@ export default function VideoControls({
           />
           <p className="settings-hint">
             Suaviza banding/blocos de compressão em áreas planas (céu,
-            sombras). Use com moderação — em excesso borra texto na tela.
+            sombras) sem borrar texto ou contornos — a nitidez das bordas
+            fica preservada.
           </p>
         </section>
 

@@ -4,6 +4,14 @@ import './ChatPanel.css';
 
 const LOAD_TIMEOUT = 5000;
 const AUTO_RELOAD_DELAY = 1500;
+// A página de erro nativa do navegador (a que aparece quando o iframe não
+// consegue carregar de verdade) é um recurso interno do próprio Chrome —
+// carrega quase instantaneamente, sem rede. A página real do popout da
+// Kick sempre leva um tempo mínimo perceptível (HTML + JS + CSS + dados
+// do chat). Um onLoad que dispara bem rápido é o sinal mais confiável
+// disponível via JS de que foi a página de erro, não o chat de verdade
+// (não dá pra ler o conteúdo do iframe para confirmar — é cross-origin).
+const SUSPICIOUSLY_FAST_LOAD_MS = 600;
 
 export default function ChatPanel({
   channelSlug,
@@ -17,12 +25,14 @@ export default function ChatPanel({
   const [reloadKey, setReloadKey] = useState(0);
   const timeoutRef = useRef(null);
   const autoReloadRef = useRef(null);
+  const loadStartRef = useRef(0);
 
   const popoutUrl = `https://kick.com/popout/${channelSlug}/chat`;
 
   useEffect(() => {
     if (!channelSlug) return;
     setLoadState('loading');
+    loadStartRef.current = Date.now();
     clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
       setLoadState((current) => (current === 'loading' ? 'timeout' : current));
@@ -30,11 +40,11 @@ export default function ChatPanel({
     return () => clearTimeout(timeoutRef.current);
   }, [channelSlug, reloadKey]);
 
-  // Quando o chat trava (timeout ou a própria página de erro carregando
-  // dentro do iframe), recarrega sozinho depois de um instante — o
-  // usuário não precisa perceber que sumiu nem clicar em nada. Se
-  // recarregar de novo e travar de novo, tenta de novo (o setLoadState
-  // no efeito acima reinicia o ciclo a cada reloadKey).
+  // Quando o chat trava (timeout, ou onLoad rápido demais sugerindo página
+  // de erro), recarrega sozinho depois de um instante — o usuário não
+  // precisa perceber que sumiu nem clicar em nada. Se recarregar de novo e
+  // travar de novo, tenta de novo (o efeito acima reinicia o ciclo a cada
+  // reloadKey).
   useEffect(() => {
     if (loadState === 'timeout') {
       clearTimeout(autoReloadRef.current);
@@ -44,6 +54,18 @@ export default function ChatPanel({
     }
     return () => clearTimeout(autoReloadRef.current);
   }, [loadState]);
+
+  const handleIframeLoad = () => {
+    const elapsed = Date.now() - loadStartRef.current;
+    clearTimeout(timeoutRef.current);
+    if (elapsed < SUSPICIOUSLY_FAST_LOAD_MS) {
+      // Carregou rápido demais para ser a página real do chat — trata como
+      // falha e deixa o ciclo de auto-reload acima cuidar de tentar de novo.
+      setLoadState('timeout');
+    } else {
+      setLoadState('loaded');
+    }
+  };
 
   const retry = () => {
     setReloadKey((k) => k + 1);
@@ -114,10 +136,7 @@ export default function ChatPanel({
           style={{ display: loadState === 'timeout' ? 'none' : 'block' }}
           src={popoutUrl}
           title="Chat da live"
-          onLoad={() => {
-            clearTimeout(timeoutRef.current);
-            setLoadState('loaded');
-          }}
+          onLoad={handleIframeLoad}
         />
       </aside>
     </>
